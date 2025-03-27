@@ -21,25 +21,35 @@
 using MIDIcallback = void (*)(byte channel, byte command, byte arg1, byte arg2);
 using StepCallback = void (*)(int current, int last);
 
+//todo 新增测试
+using MIDIcallBack2 = void(*)(struct StepNote2& note);
+struct StepNote2
+{
+  byte channel;
+  byte pitch;
+  byte velocity;
+  byte bpm;
+};
+
 typedef struct
 {
   byte channel;
   byte pitch;
   byte velocity;
   byte step;
-} FifteenStepNote;
+} StepNote;
+
+
 
 // default values for sequence array members
-const FifteenStepNote DEFAULT_NOTE = {0x0, 0x0, 0x0, 0x0};
+const StepNote DEFAULT_NOTE = {0x0, 0x0, 0x0, 0x0};
 
 class SAM2695_Driver
 {
 public:
-  SAM2695_Driver();
-  SAM2695_Driver(int memory);
-  void  begin();
-  void  begin(int tempo);
-  void  begin(int tempo, int steps);
+  SAM2695_Driver(int memory = DEFAULT_MEMORY);
+
+  void  begin(int bpms = DEFAULT_BPM, int steps = DEFAULT_STEPS);
   void  run();
   void  setBpm(int tempo);
   int   getBpm();
@@ -50,7 +60,10 @@ public:
   void  setStepHandler(StepCallback cb);
   void  setNote(byte channel, byte pitch, byte velocity, byte step = -1);
   byte  getPosition();
-  FifteenStepNote* getSequence();
+  StepNote* getStepNote();
+
+  //todo 新增测试
+  void  setMidiHandler2(MIDIcallBack2 cb);
 
 private:
   int               _quantizedPosition();
@@ -67,10 +80,14 @@ private:
 private:
   MIDIcallback      _midiCallBack;
   StepCallback      _stepCallBack;
-  FifteenStepNote*  _sequence;
+  StepNote*  _sequence;
+
+  //todo 新增测试
+  MIDIcallBack2     _midiCallBack2;
+
   bool              _running;
   int               _sequenceSize;
-  int               _tempo;
+  int               _bpm;
   byte              _steps;
   byte              _position;
   unsigned long     _clock;

@@ -4,31 +4,17 @@
 
 
 
-SAM2695_Driver::SAM2695_Driver()
-{
-  _init(DEFAULT_MEMORY);
-}
-
 SAM2695_Driver::SAM2695_Driver(int memory)
 {
   _init(memory);
 }
 
-void SAM2695_Driver::begin()
+void SAM2695_Driver::begin(int bpm, int steps)
 {
-  begin(DEFAULT_BPM, DEFAULT_STEPS);
-}
-
-void SAM2695_Driver::begin(int tempo)
-{
-  begin(tempo, DEFAULT_STEPS);
-}
-
-void SAM2695_Driver::begin(int tempo, int steps)
-{
-  setBpm(tempo);
+  setBpm(bpm);
   setSteps(steps);
 }
+
 
 // 开始运行
 void SAM2695_Driver::run()
@@ -55,10 +41,10 @@ void SAM2695_Driver::run()
   _step();
 
   // add shuffle offset to next beat if needed
-  if((_position % 2) == 0)
-    _nextBeat = now + _sixteenth + _shuffle;
-  else
-    _nextBeat = now + _sixteenth - _shuffle;
+  // if((_position % 2) == 0)
+  //   _nextBeat = now + _sixteenth + _shuffle;
+  // else
+  //   _nextBeat = now + _sixteenth - _shuffle;
 
 }
 
@@ -69,12 +55,12 @@ void SAM2695_Driver::setBpm(int tempo)
     tempo = MIN_TEMPO;
   if(tempo > MAX_TEMPO)
     tempo = MAX_TEMPO;
-  _tempo = tempo;
+  _bpm = tempo;
 }
-
+// 获取节拍
 int SAM2695_Driver::getBpm()
 {
-  return _tempo;
+  return _bpm;
 }
 
 // 设置 每一步
@@ -96,13 +82,13 @@ void SAM2695_Driver::setSteps(int steps)
 // 增加节拍
 void SAM2695_Driver::increaseBpm(const uint8_t value)
 {
-  setBpm(_tempo + value);
+  setBpm(_bpm + value);
 }
 
 // 减少节拍
 void SAM2695_Driver::decreaseBpm(const uint8_t value)
 {
-  setBpm(_tempo - value);
+  setBpm(_bpm - value);
 }
 
 //设置回调方法
@@ -135,19 +121,15 @@ void SAM2695_Driver::setNote(byte channel, byte pitch, byte velocity, byte step)
   for(int i = _sequenceSize - 1; i >= 0; i--)
   {
 
-    // used by another pitch, keep going
     if(_sequence[i].pitch > 0 && _sequence[i].pitch != pitch)
       continue;
 
-    // used by another step, keep going
     if(_sequence[i].step != position && _sequence[i].pitch != 0)
       continue;
 
-    // used by another channel, keep going
     if(_sequence[i].channel != channel && _sequence[i].pitch != 0)
       continue;
 
-    // matches the sent step, pitch & channel
     if(_sequence[i].pitch == pitch && _sequence[i].step == position && _sequence[i].channel == channel)
     {
 
@@ -179,11 +161,16 @@ void SAM2695_Driver::setNote(byte channel, byte pitch, byte velocity, byte step)
 }
 
 // getSequence
-//
+
 // Returns a pointer to the current sequence
-FifteenStepNote* SAM2695_Driver::getSequence()
+StepNote* SAM2695_Driver::getStepNote()
 {
   return _sequence;
+}
+
+void SAM2695_Driver::setMidiHandler2(MIDIcallBack2 cb)
+{
+  _midiCallBack2 = cb;
 }
 
 // getPosition
@@ -204,8 +191,8 @@ void SAM2695_Driver::_init(int memory)
   _nextBeat = 0;
   _nextClock = 0;
   _position = 0;
-  _sequenceSize = memory / sizeof(FifteenStepNote);
-  _sequence = new FifteenStepNote[_sequenceSize];
+  _sequenceSize = memory / sizeof(StepNote);
+  _sequence = new StepNote[_sequenceSize];
 
   // set up default notes
   _resetSequence();
@@ -233,22 +220,16 @@ int SAM2695_Driver::_quantizedPosition()
   if(_shuffle > 0)
     return _position;
 
-  // what's the time?
   unsigned long now = millis();
 
-  // calculate value of 32nd note
   unsigned long thirty_second = _sixteenth / 2;
 
-  // use current position if below middle point
   if(now <= (_nextBeat - thirty_second))
     return _position;
 
-  // return first step if the next step
-  // is past the step count
   if((_position + 1) >= _steps)
     return 0;
 
-  // return next step
   return _position + 1;
 
 }
@@ -321,7 +302,7 @@ void SAM2695_Driver::_heapSort()
 {
 
   int i;
-  FifteenStepNote tmp;
+  StepNote tmp;
 
   for(i = _sequenceSize / 2; i >= 0; i--)
     _siftDown(i, _sequenceSize - 1);
@@ -355,7 +336,7 @@ void SAM2695_Driver::_siftDown(int root, int bottom)
   if(_greater(root, max) == root || _greater(root, max) == -1)
     return;
 
-  FifteenStepNote tmp = _sequence[root];
+  StepNote tmp = _sequence[root];
   _sequence[root] = _sequence[max];
   _sequence[max] = tmp;
 
