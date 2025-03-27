@@ -1,9 +1,9 @@
 #include <Arduino.h>
 #include "Button/EmmaButton.hpp"
-#include "SAM2695/FifteenStep.h"
+#include "SAM2695/SAM2695Driver.h"
 
 EmmaButton button;
-FifteenStep seq = FifteenStep();
+SAM2695_Driver seq = SAM2695_Driver();
 TaskHandle_t drum_loop_handler;
 bool isDrumPlaying = false;
 int bpm = DEFAULT_BPM;

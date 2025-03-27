@@ -1,37 +1,37 @@
 
 #include "Arduino.h"
-#include "FifteenStep.h"
+#include "SAM2695Driver.h"
 
 
 
-FifteenStep::FifteenStep()
+SAM2695_Driver::SAM2695_Driver()
 {
   _init(DEFAULT_MEMORY);
 }
 
-FifteenStep::FifteenStep(int memory)
+SAM2695_Driver::SAM2695_Driver(int memory)
 {
   _init(memory);
 }
 
-void FifteenStep::begin()
+void SAM2695_Driver::begin()
 {
   begin(DEFAULT_BPM, DEFAULT_STEPS);
 }
 
-void FifteenStep::begin(int tempo)
+void SAM2695_Driver::begin(int tempo)
 {
   begin(tempo, DEFAULT_STEPS);
 }
 
-void FifteenStep::begin(int tempo, int steps)
+void SAM2695_Driver::begin(int tempo, int steps)
 {
   setBpm(tempo);
   setSteps(steps);
 }
 
 // 开始运行
-void FifteenStep::run()
+void SAM2695_Driver::run()
 {
 
   if(! _running)
@@ -63,7 +63,7 @@ void FifteenStep::run()
 }
 
 // 设置节拍
-void FifteenStep::setBpm(int tempo)
+void SAM2695_Driver::setBpm(int tempo)
 {
   if(tempo < MIN_TEMPO)
     tempo = MIN_TEMPO;
@@ -72,13 +72,13 @@ void FifteenStep::setBpm(int tempo)
   _tempo = tempo;
 }
 
-int FifteenStep::getBpm()
+int SAM2695_Driver::getBpm()
 {
   return _tempo;
 }
 
 // 设置 每一步
-void FifteenStep::setSteps(int steps)
+void SAM2695_Driver::setSteps(int steps)
 {
   if(steps > MAX_STEPS)
     steps = MAX_STEPS;
@@ -94,31 +94,31 @@ void FifteenStep::setSteps(int steps)
 }
 
 // 增加节拍
-void FifteenStep::increaseBpm(const uint8_t value)
+void SAM2695_Driver::increaseBpm(const uint8_t value)
 {
   setBpm(_tempo + value);
 }
 
 // 减少节拍
-void FifteenStep::decreaseBpm(const uint8_t value)
+void SAM2695_Driver::decreaseBpm(const uint8_t value)
 {
   setBpm(_tempo - value);
 }
 
 //设置回调方法
-void FifteenStep::setMidiHandler(MIDIcallback cb)
+void SAM2695_Driver::setMidiHandler(MIDIcallback cb)
 {
   _midiCallBack = cb;
 }
 
 //设置回调方法
-void FifteenStep::setStepHandler(StepCallback cb)
+void SAM2695_Driver::setStepHandler(StepCallback cb)
 {
   _stepCallBack = cb;
 }
 
 //设置一个音符
-void FifteenStep::setNote(byte channel, byte pitch, byte velocity, byte step)
+void SAM2695_Driver::setNote(byte channel, byte pitch, byte velocity, byte step)
 {
   if(! _running)
     return;
@@ -181,7 +181,7 @@ void FifteenStep::setNote(byte channel, byte pitch, byte velocity, byte step)
 // getSequence
 //
 // Returns a pointer to the current sequence
-FifteenStepNote* FifteenStep::getSequence()
+FifteenStepNote* SAM2695_Driver::getSequence()
 {
   return _sequence;
 }
@@ -191,13 +191,13 @@ FifteenStepNote* FifteenStep::getSequence()
 // Returns the closest 16th note to the
 // present time. This is used to see where to
 // save the new note.
-byte FifteenStep::getPosition()
+byte SAM2695_Driver::getPosition()
 {
   return _quantizedPosition();
 }
 
 
-void FifteenStep::_init(int memory)
+void SAM2695_Driver::_init(int memory)
 {
 
   _running = true;
@@ -215,7 +215,7 @@ void FifteenStep::_init(int memory)
 // _resetSequence
 //
 // Sets sequence to default state
-void FifteenStep::_resetSequence()
+void SAM2695_Driver::_resetSequence()
 {
   // set sequence to default note value
   for(int i=0; i < _sequenceSize; ++i)
@@ -227,7 +227,7 @@ void FifteenStep::_resetSequence()
 // Returns the closest 16th note to the
 // present time. This is used to see where to
 // save the new note.
-int FifteenStep::_quantizedPosition()
+int SAM2695_Driver::_quantizedPosition()
 {
 
   if(_shuffle > 0)
@@ -258,7 +258,7 @@ int FifteenStep::_quantizedPosition()
 // Moves _position forward by one step, calls the
 // step callback with the current & last step position,
 // and triggers any notes at the current position.
-void FifteenStep::_step()
+void SAM2695_Driver::_step()
 {
 
   // save the last position so we
@@ -286,7 +286,7 @@ void FifteenStep::_step()
 //
 // Calls the user defined MIDI callback with
 // the midi clock message
-void FifteenStep::_tick()
+void SAM2695_Driver::_tick()
 {
 
   // bail if the midi callback isn't set
@@ -302,7 +302,7 @@ void FifteenStep::_tick()
 //
 // Calls the user defined MIDI callback with
 // the position of playback
-void FifteenStep::_loopPosition()
+void SAM2695_Driver::_loopPosition()
 {
 
   // bail if the midi callback isn't set
@@ -317,7 +317,7 @@ void FifteenStep::_loopPosition()
 // _heapSort
 //
 // Sort the sequence based on the heapsort algorithm
-void FifteenStep::_heapSort()
+void SAM2695_Driver::_heapSort()
 {
 
   int i;
@@ -342,7 +342,7 @@ void FifteenStep::_heapSort()
 // _siftDown
 //
 // Used by heapsort to shift note positions
-void FifteenStep::_siftDown(int root, int bottom)
+void SAM2695_Driver::_siftDown(int root, int bottom)
 {
 
   int max = root * 2 + 1;
@@ -368,7 +368,7 @@ void FifteenStep::_siftDown(int root, int bottom)
 // Used by heapsort to compare two notes so we
 // know where they should be placed in the sorted
 // array. Will return -1 if they are equal
-int FifteenStep::_greater(int first, int second)
+int SAM2695_Driver::_greater(int first, int second)
 {
 
   if(_sequence[first].velocity > _sequence[second].velocity)
@@ -399,7 +399,7 @@ int FifteenStep::_greater(int first, int second)
 //
 // Calls the user defined MIDI callback with
 // all of the note on and off messages at the
-void FifteenStep::_triggerNotes()
+void SAM2695_Driver::_triggerNotes()
 {
   // bail if the midi callback isn't set
   if(! _midiCallBack)

@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------------
 //
-// FifteenStep.h
+// SAM2695Driver.h
 // A generic MIDI sequencer library for Arduino.
 // // Author: Todd Treece <todd@uniontownlabs.org>
 // Copyright: (c) 2015 Adafruit Industries
@@ -32,11 +32,11 @@ typedef struct
 // default values for sequence array members
 const FifteenStepNote DEFAULT_NOTE = {0x0, 0x0, 0x0, 0x0};
 
-class FifteenStep
+class SAM2695_Driver
 {
 public:
-  FifteenStep();
-  FifteenStep(int memory);
+  SAM2695_Driver();
+  SAM2695_Driver(int memory);
   void  begin();
   void  begin(int tempo);
   void  begin(int tempo, int steps);
