@@ -21,7 +21,7 @@
 using MIDIcallback = void (*)(byte channel, byte command, byte arg1, byte arg2);
 using StepCallback = void (*)(int current, int last);
 
-//todo 新增测试
+//todo add test
 using MIDIcallBack2 = void(*)(struct StepNote2& note);
 struct StepNote2
 {
@@ -62,7 +62,7 @@ public:
   byte  getPosition();
   StepNote* getStepNote();
 
-  //todo 新增测试
+  //todo add test
   void  setMidiHandler2(MIDIcallBack2 cb);
 
 private:
@@ -82,7 +82,7 @@ private:
   StepCallback      _stepCallBack;
   StepNote*  _sequence;
 
-  //todo 新增测试
+  //todo add test
   MIDIcallBack2     _midiCallBack2;
 
   bool              _running;
