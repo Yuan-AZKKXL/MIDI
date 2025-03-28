@@ -2,7 +2,6 @@
 //
 // SAM2695Driver.h
 // A generic MIDI sequencer library for Arduino.
-// // Author: Todd Treece <todd@uniontownlabs.org>
 // Copyright: (c) 2015 Adafruit Industries
 // License: GNU GPLv3
 // // ---------------------------------------------------------------------------
@@ -11,26 +10,17 @@
 
 #include "Arduino.h"
 
+
+/*------------------------------------------- Defines begin -------------------------------------------*/
 #define DEFAULT_BPM 120
 #define DEFAULT_STEPS 16
 #define DEFAULT_MEMORY 512
 #define MIN_TEMPO 40
 #define MAX_TEMPO 240
 #define MAX_STEPS 256
+/*------------------------------------------- Defines end -------------------------------------------*/
 
-using MIDIcallback = void (*)(byte channel, byte command, byte arg1, byte arg2);
-using StepCallback = void (*)(int current, int last);
-
-//todo add test
-using MIDIcallBack2 = void(*)(struct StepNote2& note);
-struct StepNote2
-{
-  byte channel;
-  byte pitch;
-  byte velocity;
-  byte bpm;
-};
-
+/*------------------------------------------- Structs begin -------------------------------------------*/
 typedef struct
 {
   byte channel;
@@ -39,22 +29,35 @@ typedef struct
   byte step;
 } StepNote;
 
-
+//! add new struct for test
+struct StepNote2
+{
+  byte channel;
+  byte pitch;
+  byte velocity;
+  byte bpm;
+};
 
 // default values for sequence array members
 const StepNote DEFAULT_NOTE = {0x0, 0x0, 0x0, 0x0};
+/*------------------------------------------- Structs end -------------------------------------------*/
+
+/*------------------------------------------- callback function type -------------------------------------------*/
+using MIDIcallback = void (*)(byte channel, byte command, byte arg1, byte arg2);
+using StepCallback = void (*)(int current, int last);
+//! add new callback function type for test
+using MIDIcallBack2 = void(*)(struct StepNote2& note);
+/**------------------------------------------- callback function end -------------------------------------------*/
+
 
 class SAM2695_Driver
 {
 public:
   SAM2695_Driver(int memory = DEFAULT_MEMORY);
-
   void  begin(int bpms = DEFAULT_BPM, int steps = DEFAULT_STEPS);
   void  run();
   void  setBpm(int tempo);
   int   getBpm();
-  void  increaseBpm(const uint8_t value);
-  void  decreaseBpm(const uint8_t value);
   void  setSteps(int steps);
   void  setMidiHandler(MIDIcallback cb);
   void  setStepHandler(StepCallback cb);

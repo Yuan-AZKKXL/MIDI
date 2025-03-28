@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include "Button/EmmaButton.hpp"
-#include "SAM2695/SAM2695Driver.h"
+#include "SAM2695/SAM2695_Driver.h"
 
 //creat object of EmmaButton and SAM2695_Driver
 EmmaButton button;
@@ -141,7 +141,7 @@ void setup()
 void loop()
 {
     if (button.A.pressed() == BtnAct::pressed){
-        midi(0, 0x9, 77, 127);
+        midi(0, 0x9, 77, 50);
         // seq.setNote(0, 77, 127);
     }else if (button.A.released() == BtnAct::released){
         midi(0, 0x8, 77, 0);
@@ -159,16 +159,16 @@ void loop()
     }
 
     if(button.C.pressed() == BtnAct::pressed){
-        bpm += 10;
-        BEAT_DURATION_MS = 60000 / (bpm * 240);
+        bpm += 100;
+        BEAT_DURATION_MS = 60000 / (bpm * 24);
     }
 
-    // if(button.C.longPressed() == BtnAct::longPressed)
-    // {
-    //     //reset bpm to default
-    //     bpm = 120;
-    //     BEAT_DURATION_MS = 60000 / (bpm * 24);
-    // }
+    if(button.C.longPressed() == BtnAct::longPressed)
+    {
+        //reset bpm to default
+        bpm = 120;
+        BEAT_DURATION_MS = 60000 / (bpm * 24);
+    }
 
     if(button.D.pressed() == BtnAct::pressed)
     {

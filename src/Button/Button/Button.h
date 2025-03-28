@@ -33,11 +33,11 @@ public:
 	const static bool RELEASED = HIGH;
 
 private:
-	uint8_t  _pin;
-	uint16_t _delay;
-	bool     _state;
-	uint32_t _ignore_until;
-	bool     _has_changed;
+	uint8_t  pin_;
+	uint16_t delay_;
+	bool     state_;
+	uint32_t ignoreUntil_;
+	bool     hasChanged_;
 	unsigned long pressedTime_ ;  // Track the time when button was pressed
 	unsigned long longPressThreshold_ ; // Define the long press duration threshold (in milliseconds)
 	bool longPressFlag_;
