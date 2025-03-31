@@ -5,7 +5,7 @@
 
 /*------------------------------------------- Defines begin -------------------------------------------*/
 #define MIDI_SERIAL_BAUD_RATE 31250
-#define USB_SERIAL_BAUD_RATE 115200
+#define USB_SERIAL_BAUD_RATE 9600
 #define MIDI_COMMAND_ON 0x90
 #define MIDI_COMMAND_OFF 0x80
 #define DEFAULT_BPM 120

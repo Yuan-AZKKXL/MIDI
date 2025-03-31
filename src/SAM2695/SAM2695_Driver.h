@@ -61,6 +61,7 @@ private:
   unsigned long     _shuffle;
   unsigned long     _nextBeat;
   unsigned long     _nextClock;
+public:
   HardwareSerial*   _serial;
 };
 
