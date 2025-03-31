@@ -32,10 +32,9 @@ void midi(byte channel, byte command, byte arg1, byte arg2)
         command <<= 4;
         command |= channel;
     }
-
-    Serial.write(command);
-    Serial.write(arg1);
-    Serial.write(arg2);
+    seq._serial->write(command);
+    seq._serial->write(arg1);
+    seq._serial->write(arg2);
 }
 
 //button D pressed function
@@ -141,11 +140,11 @@ void setup()
 void loop()
 {
     if (button.A.pressed() == BtnAct::pressed){
-        midi(0, 0x9, 77, 50);
-        // seq.setNote(0, 77, 127);
+        midi(0, 0x9, 77, 127);
+        seq.setNote(0, 77, 127);
     }else if (button.A.released() == BtnAct::released){
         midi(0, 0x8, 77, 0);
-        // seq.setNote(0, 77, 0);
+        seq.setNote(0, 77, 0);
     }
 
     if(button.B.pressed() == BtnAct::pressed){
@@ -160,6 +159,10 @@ void loop()
 
     if(button.C.pressed() == BtnAct::pressed){
         bpm += 100;
+        if(bpm > 500)
+        {
+            bpm = DEFAULT_BPM;
+        }
         BEAT_DURATION_MS = 60000 / (bpm * 24);
     }
 

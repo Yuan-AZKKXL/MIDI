@@ -5,55 +5,17 @@
 // Copyright: (c) 2015 Adafruit Industries
 // License: GNU GPLv3
 // // ---------------------------------------------------------------------------
-#ifndef _FifteenStep_h
-#define _FifteenStep_h
+#ifndef _SAM2695_Driver_H
+#define _SAM2695_Driver_H
 
 #include "Arduino.h"
-
-
-/*------------------------------------------- Defines begin -------------------------------------------*/
-#define DEFAULT_BPM 120
-#define DEFAULT_STEPS 16
-#define DEFAULT_MEMORY 512
-#define MIN_TEMPO 40
-#define MAX_TEMPO 240
-#define MAX_STEPS 256
-/*------------------------------------------- Defines end -------------------------------------------*/
-
-/*------------------------------------------- Structs begin -------------------------------------------*/
-typedef struct
-{
-  byte channel;
-  byte pitch;
-  byte velocity;
-  byte step;
-} StepNote;
-
-//! add new struct for test
-struct StepNote2
-{
-  byte channel;
-  byte pitch;
-  byte velocity;
-  byte bpm;
-};
-
-// default values for sequence array members
-const StepNote DEFAULT_NOTE = {0x0, 0x0, 0x0, 0x0};
-/*------------------------------------------- Structs end -------------------------------------------*/
-
-/*------------------------------------------- callback function type -------------------------------------------*/
-using MIDIcallback = void (*)(byte channel, byte command, byte arg1, byte arg2);
-using StepCallback = void (*)(int current, int last);
-//! add new callback function type for test
-using MIDIcallBack2 = void(*)(struct StepNote2& note);
-/**------------------------------------------- callback function end -------------------------------------------*/
+#include "SAM2695_Def.h"
 
 
 class SAM2695_Driver
 {
 public:
-  SAM2695_Driver(int memory = DEFAULT_MEMORY);
+  SAM2695_Driver(int memory = DEFAULT_MEMORY, HardwareSerial* serial = &Serial2,int baud = 31250,uint8_t RX = 42, uint8_t TX = 43);
   void  begin(int bpms = DEFAULT_BPM, int steps = DEFAULT_STEPS);
   void  run();
   void  setBpm(int tempo);
@@ -62,7 +24,7 @@ public:
   void  setMidiHandler(MIDIcallback cb);
   void  setStepHandler(StepCallback cb);
   void  setNote(byte channel, byte pitch, byte velocity, byte step = -1);
-  byte  getPosition();
+  // byte  getPosition();
   StepNote* getStepNote();
 
   //todo add test
@@ -98,6 +60,8 @@ private:
   unsigned long     _shuffle;
   unsigned long     _nextBeat;
   unsigned long     _nextClock;
+public:
+  HardwareSerial*   _serial;
 };
 
 #endif
