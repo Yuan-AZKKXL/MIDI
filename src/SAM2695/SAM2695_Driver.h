@@ -16,6 +16,7 @@ class SAM2695_Driver
 {
 public:
   SAM2695_Driver(int memory = DEFAULT_MEMORY, HardwareSerial* serial = &Serial2,int baud = 31250,uint8_t RX = 42, uint8_t TX = 43);
+  void sendCMD(byte* buf, int size);
   void  begin(int bpms = DEFAULT_BPM, int steps = DEFAULT_STEPS);
   void  run();
   void  setBpm(int tempo);
@@ -60,7 +61,6 @@ private:
   unsigned long     _shuffle;
   unsigned long     _nextBeat;
   unsigned long     _nextClock;
-public:
   HardwareSerial*   _serial;
 };
 

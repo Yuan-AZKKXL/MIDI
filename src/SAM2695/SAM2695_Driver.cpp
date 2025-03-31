@@ -19,6 +19,11 @@ SAM2695_Driver::SAM2695_Driver(int memory, HardwareSerial* serial, int baud, uin
   _init(memory);
 }
 
+void SAM2695_Driver::sendCMD(byte* buf, int size)
+{
+  _serial->write(buf, size);
+}
+
 /**
  * Initializes the SAM2695_Driver with the specified BPM (beats per minute) and number of steps.
  * This function sets up the metronome's timing and the number of steps in the sequence.

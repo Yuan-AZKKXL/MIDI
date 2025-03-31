@@ -4,15 +4,37 @@
 #define _SAM2695_DEF_H
 
 /*------------------------------------------- Defines begin -------------------------------------------*/
+#define MIDI_SERIAL_BAUD_RATE 31250
+#define USB_SERIAL_BAUD_RATE 115200
+#define MIDI_COMMAND_ON 0x90
+#define MIDI_COMMAND_OFF 0x80
 #define DEFAULT_BPM 120
 #define DEFAULT_STEPS 16
 #define DEFAULT_MEMORY 512
 #define MIN_TEMPO 40
 #define MAX_TEMPO 240
 #define MAX_STEPS 256
+#define BASIC_TIME_MS 60000
 
-/* Program Change: Band 0 */
+/* define channel begin */
+#define CHANNEL_0 0
+#define CHANNEL_1 1
+#define CHANNEL_2 2
+#define CHANNEL_3 3
+#define CHANNEL_4 4
+#define CHANNEL_5 5
+#define CHANNEL_6 6
+#define CHANNEL_7 7
+#define CHANNEL_8 8
+#define CHANNEL_9 9
+#define CHANNEL_10 10
+#define CHANNEL_11 11
+#define CHANNEL_12 12
+#define CHANNEL_13 13
+#define CHANNEL_14 14
+#define CHANNEL_15 15
 
+/* define note*/
 #define BANK0_Grand_Piano1 1
 #define BANK0_Bright_Piano2 2
 #define BANK0_ElGrd_Piano3 3
@@ -142,8 +164,8 @@
 #define BANK0_Applause 127
 #define BANK0_Gunshot 128
 
-/* Program Change: Band 127 */
 
+/* define pitch */
 #define BANK1_Piano1 1
 #define BANK1_Piano2 2
 #define BANK1_Piano3 3
