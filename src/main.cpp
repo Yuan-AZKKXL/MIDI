@@ -25,6 +25,7 @@ void setup()
     Serial.begin(USB_SERIAL_BAUD_RATE);
     seq.begin();
     seq.setMidiHandler(midi);
+    Serial.println("EmmaButton and SAM2695_Driver are ready!");
 }
 
 void loop()
