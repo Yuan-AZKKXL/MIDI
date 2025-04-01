@@ -9,7 +9,14 @@
 #include "Arduino.h"
 #include "Event/Event.hpp"
 
-
+enum BtnAct
+{
+	None = 0,
+	Toggled,
+	Pressed,
+	Released,
+	LongPressed
+};
 
 class __Button
 {
@@ -18,10 +25,10 @@ public:
 	void begin();
 	bool read();
 	bool has_changed();
-	EventType toggled();
-	EventType pressed();
-	EventType released();
-	EventType longPressed();
+	BtnAct toggled();
+	BtnAct pressed();
+	BtnAct released();
+	BtnAct longPressed();
 
 	const static bool PRESSED = LOW;
 	const static bool RELEASED = HIGH;

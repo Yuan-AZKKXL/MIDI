@@ -7,6 +7,8 @@
 #include "Button.h"
 #include <Arduino.h>
 
+
+
 __Button::__Button(uint8_t pin, uint16_t debounce_ms)
 :  pin_(pin)
 ,  delay_(debounce_ms)
@@ -45,11 +47,11 @@ bool __Button::read(){
 }
 
 // has the button been toggled from on -> off, or vice versa
-EventType __Button::toggled(){
+BtnAct __Button::toggled(){
 	if (has_changed()) {
-		return EventType::Toggled;
+		return BtnAct::Toggled;
 	}
-	return EventType::None;
+	return BtnAct::None;
 }
 
 // mostly internal, tells you if a button has changed after calling the read() function
@@ -62,23 +64,23 @@ bool __Button::has_changed(){
 }
 
 // has the button gone from off -> on
-EventType __Button::pressed(){
+BtnAct __Button::pressed(){
 	if (read() == LOW && has_changed()) {
-		return EventType::Pressed;
+		return BtnAct::Pressed;
 	}
-	return EventType::None;
+	return BtnAct::None;
 }
 
 // has the button gone from on -> off
-EventType __Button::released(){
+BtnAct __Button::released(){
 	if (read() == HIGH && has_changed()) {
-		return EventType::Released;
+		return BtnAct::Released;
 	}
-	return EventType::None;
+	return BtnAct::None;
 }
 
 // has the button detect long press
-EventType __Button::longPressed(){
+BtnAct __Button::longPressed(){
 	// If the button is pressed, check if it has been pressed for longer than the threshold
 	if (read() == PRESSED) {
 		if (pressedTime_ == 0) {
@@ -89,9 +91,9 @@ EventType __Button::longPressed(){
 		if (millis() - pressedTime_ >= longPressThreshold_ ) {
 			if(longPressFlag_ == false){
 				longPressFlag_ = true;
-				return EventType::LongPressed;  // Long press detected
+				return BtnAct::LongPressed;  // Long press detected
 			}
-			return EventType::None;  // Long press detected, but already reported
+			return BtnAct::None;  // Long press detected, but already reported
 		}
 	} else {
 		// Reset the pressed_time when the button is released
@@ -100,6 +102,6 @@ EventType __Button::longPressed(){
 		}
 		pressedTime_ = 0;
 	}
-	return EventType::None;   // No long press
+	return BtnAct::None;   // No long press
 }
 

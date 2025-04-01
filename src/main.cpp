@@ -1,36 +1,84 @@
 #include <Arduino.h>
 #include "Button/EmmaButton.hpp"
-#include "SAM2695/SAM2695_Def.h"
 #include "Event/ButtonState.hpp"
-#include "SAM2695/SAM2695Synth.h"
 
-//creat object of EmmaButton and SAM2695_Driver
 EmmaButton button;
-SAM2695Synth seq = SAM2695Synth();
 
+//创建状态机
+StateMachine stateMachine;
+// 获取下一个输入事件
+Event* getNextEvent() {
+    if (button.A.pressed() == BtnAct::Pressed)
+    {
+        Event* event = new Event(EventType::BtnAPressed);
+        return event;
+    }
+    if (button.A.released() == BtnAct::Released)
+    {
+        Event* event = new Event(EventType::BtnAReleased);
+        return event;
+    }
+
+    if (button.B.pressed() == BtnAct::Pressed)
+    {
+        Event* event = new Event(EventType::BtnBPressed);
+        return event;
+    }
+    if (button.B.released() == BtnAct::Released)
+    {
+        Event* event = new Event(EventType::BtnBReleased);
+        return event;
+    }
+
+    if (button.C.pressed() == BtnAct::Pressed)
+    {
+        Event* event = new Event(EventType::BtnCPressed);
+        return event;
+    }
+    if (button.C.released() == BtnAct::Released)
+    {
+        Event* event = new Event(EventType::BtnCReleased);
+        return event;
+    }
+
+    if (button.D.pressed() == BtnAct::Pressed)
+    {
+        Event* event = new Event(EventType::BtnDPressed);
+        return event;
+    }
+    if (button.D.released() == BtnAct::Released)
+    {
+        Event* event = new Event(EventType::BtnDReleased);
+        return event;
+    }
+    return nullptr;
+}
 
 void setup()
 {
-    Serial.begin(USB_SERIAL_BAUD_RATE);
-    seq.begin();
-    seq.setInstrument(0, 0, BANK1_Piano1);
-    delay(2000);
-    Serial.println("EmmaButton and SAM2695_Driver are ready!");
+    //注册状态
+    StateManager* manager = StateManager::getInstance();
+    //注册按钮状态
+    manager->registerState(new ButtonState());
+    //注册错误状态
+    ErrorState* errorState = new ErrorState();
+    manager->registerState(errorState);
+    //初始化状态机
+    if(!stateMachine.init(manager->getState(ButtonState::ID), errorState));
+    {
+        StateManager::releaseInstance();
+        return ;
+    }
 }
 
 void loop()
 {
-    if (button.A.pressed() == EventType::Pressed)
+    // 获取下一个事件
+    Event* event = getNextEvent();
+    if(event != nullptr)
     {
-        // @param4 volume 0-127
-        seq.setNoteOn(CHANNEL_0, BANK0_BlownBottle, 127);
-        Serial.println("Button pressed!");
-    }
-    if (button.A.released() == EventType::Released)
-    {
-        // @param4 volume 0-127
-        seq.setNoteOff(CHANNEL_0, BANK0_BlownBottle, 0);
-        Serial.println("Button released!");
+        stateMachine.handleEvent(event);
+        delete event;
     }
 }
 
