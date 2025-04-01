@@ -7,7 +7,7 @@
 
 #include "State.hpp"
 
-#define MAX_STATES 20
+#define MAX_STATES 10
 
 //状态管理器
 class StateManager {

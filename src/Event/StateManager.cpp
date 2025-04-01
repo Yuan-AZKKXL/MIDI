@@ -68,7 +68,8 @@ State* StateManager::getState(int index) const
     {
         return nullptr;
     }
-    return _states[index - 1];
+    State* state = _states[index - 1];
+    return state;
 }
 
 int StateManager::getStateCount() const

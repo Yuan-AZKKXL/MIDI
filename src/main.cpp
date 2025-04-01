@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include "Button/EmmaButton.hpp"
-#include "Event/ButtonState.hpp"
+#include "Event/ButtonState.h"
 
 EmmaButton button;
 
@@ -13,9 +13,9 @@ Event* getNextEvent() {
         Event* event = new Event(EventType::BtnAPressed);
         return event;
     }
-    if (button.A.released() == BtnAct::Released)
+    if(button.A.longPressed() == BtnAct::LongPressed)
     {
-        Event* event = new Event(EventType::BtnAReleased);
+        Event* event = new Event(EventType::BtnALongPressed);
         return event;
     }
 
@@ -24,9 +24,9 @@ Event* getNextEvent() {
         Event* event = new Event(EventType::BtnBPressed);
         return event;
     }
-    if (button.B.released() == BtnAct::Released)
+    if(button.B.longPressed() == BtnAct::LongPressed)
     {
-        Event* event = new Event(EventType::BtnBReleased);
+        Event* event = new Event(EventType::BtnBLongPressed);
         return event;
     }
 
@@ -35,9 +35,9 @@ Event* getNextEvent() {
         Event* event = new Event(EventType::BtnCPressed);
         return event;
     }
-    if (button.C.released() == BtnAct::Released)
+    if(button.C.longPressed() == BtnAct::LongPressed)
     {
-        Event* event = new Event(EventType::BtnCReleased);
+        Event* event = new Event(EventType::BtnCLongPressed);
         return event;
     }
 
@@ -46,11 +46,24 @@ Event* getNextEvent() {
         Event* event = new Event(EventType::BtnDPressed);
         return event;
     }
-    if (button.D.released() == BtnAct::Released)
+    if(button.D.longPressed() == BtnAct::LongPressed)
     {
-        Event* event = new Event(EventType::BtnDReleased);
+        Event* event = new Event(EventType::BtnDLongPressed);
         return event;
     }
+    if(button.D.released() == BtnAct::Released)
+    {
+        return nullptr;
+    }
+    if(button.A.released() == BtnAct::Released
+        ||(button.B.released() == BtnAct::Released)
+        ||(button.C.released() == BtnAct::Released)
+        ||(button.D.released() == BtnAct::Released))
+    {
+        Event* event = new Event(EventType::NoEvent);
+        return event;
+    }
+
     return nullptr;
 }
 
@@ -59,12 +72,14 @@ void setup()
     //注册状态
     StateManager* manager = StateManager::getInstance();
     //注册按钮状态
-    manager->registerState(new ButtonState());
+    manager->registerState(new ButtonState1());
+    manager->registerState(new ButtonState2());
+    manager->registerState(new ButtonState3());
     //注册错误状态
     ErrorState* errorState = new ErrorState();
     manager->registerState(errorState);
     //初始化状态机
-    if(!stateMachine.init(manager->getState(ButtonState::ID), errorState));
+    if(!(stateMachine.init(manager->getState(ButtonState1::ID), errorState)))
     {
         StateManager::releaseInstance();
         return ;
