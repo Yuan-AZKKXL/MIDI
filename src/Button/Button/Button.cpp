@@ -45,11 +45,11 @@ bool __Button::read(){
 }
 
 // has the button been toggled from on -> off, or vice versa
-BtnAct __Button::toggled(){
+EventType __Button::toggled(){
 	if (has_changed()) {
-		return BtnAct::toggled;
+		return EventType::Toggled;
 	}
-	return BtnAct::none;
+	return EventType::None;
 }
 
 // mostly internal, tells you if a button has changed after calling the read() function
@@ -62,23 +62,23 @@ bool __Button::has_changed(){
 }
 
 // has the button gone from off -> on
-BtnAct __Button::pressed(){
+EventType __Button::pressed(){
 	if (read() == LOW && has_changed()) {
-		return BtnAct::pressed;
+		return EventType::Pressed;
 	}
-	return BtnAct::none;
+	return EventType::None;
 }
 
 // has the button gone from on -> off
-BtnAct __Button::released(){
+EventType __Button::released(){
 	if (read() == HIGH && has_changed()) {
-		return BtnAct::released;
+		return EventType::Released;
 	}
-	return BtnAct::none;
+	return EventType::None;
 }
 
 // has the button detect long press
-BtnAct __Button::longPressed(){
+EventType __Button::longPressed(){
 	// If the button is pressed, check if it has been pressed for longer than the threshold
 	if (read() == PRESSED) {
 		if (pressedTime_ == 0) {
@@ -89,9 +89,9 @@ BtnAct __Button::longPressed(){
 		if (millis() - pressedTime_ >= longPressThreshold_ ) {
 			if(longPressFlag_ == false){
 				longPressFlag_ = true;
-				return BtnAct::longPressed;  // Long press detected
+				return EventType::LongPressed;  // Long press detected
 			}
-			return BtnAct::none;  // Long press detected, but already reported
+			return EventType::None;  // Long press detected, but already reported
 		}
 	} else {
 		// Reset the pressed_time when the button is released
@@ -100,6 +100,6 @@ BtnAct __Button::longPressed(){
 		}
 		pressedTime_ = 0;
 	}
-	return BtnAct::none;   // No long press
+	return EventType::None;   // No long press
 }
 

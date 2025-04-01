@@ -1,51 +1,36 @@
 #include <Arduino.h>
 #include "Button/EmmaButton.hpp"
-#include "SAM2695/SAM2695_Driver.h"
+#include "SAM2695/SAM2695_Def.h"
+#include "Event/ButtonState.hpp"
+#include "SAM2695/SAM2695Synth.h"
 
 //creat object of EmmaButton and SAM2695_Driver
 EmmaButton button;
-SAM2695_Driver seq = SAM2695_Driver();
+SAM2695Synth seq = SAM2695Synth();
 
-//set global variable
-
-//midi callback function
-void midi(byte channel, byte command, byte arg1, byte arg2)
-{
-    if(command < 128) {
-        command <<= 4;
-        command |= channel;
-    }
-    byte CMD_NOTE_ON[] ={command, arg1, arg2};
-    seq._serial->write(command);
-    seq._serial->write(arg1);
-    seq._serial->write(arg2);
-    // seq.sendCMD(CMD_NOTE_ON, sizeof(CMD_NOTE_ON));
-}
 
 void setup()
 {
     Serial.begin(USB_SERIAL_BAUD_RATE);
     seq.begin();
-    seq.setMidiHandler(midi);
-    delay(3000);
+    seq.setInstrument(0, 0, BANK1_Piano1);
+    delay(2000);
     Serial.println("EmmaButton and SAM2695_Driver are ready!");
 }
 
 void loop()
 {
-    if (button.A.pressed() == BtnAct::pressed)
+    if (button.A.pressed() == EventType::Pressed)
     {
         // @param4 volume 0-127
-        midi(CHANNEL_0, MIDI_COMMAND_ON, BANK0_BlownBottle, 127);
+        seq.setNoteOn(CHANNEL_0, BANK0_BlownBottle, 127);
         Serial.println("Button pressed!");
     }
-
-    if (button.A.released() == BtnAct::released)
+    if (button.A.released() == EventType::Released)
     {
         // @param4 volume 0-127
-        midi(CHANNEL_0, MIDI_COMMAND_OFF, BANK0_BlownBottle, 0);
+        seq.setNoteOff(CHANNEL_0, BANK0_BlownBottle, 0);
         Serial.println("Button released!");
     }
-    seq.run();
 }
 

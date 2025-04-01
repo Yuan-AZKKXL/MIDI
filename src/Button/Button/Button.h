@@ -7,15 +7,9 @@
 #ifndef Button_h
 #define Button_h
 #include "Arduino.h"
+#include "Event/Event.hpp"
 
-enum BtnAct
-{
-	none = 0,
-	toggled,
-	pressed ,
-	released,
-	longPressed
-};
+
 
 class __Button
 {
@@ -24,10 +18,10 @@ public:
 	void begin();
 	bool read();
 	bool has_changed();
-	BtnAct toggled();
-	BtnAct pressed();
-	BtnAct released();
-	BtnAct longPressed();
+	EventType toggled();
+	EventType pressed();
+	EventType released();
+	EventType longPressed();
 
 	const static bool PRESSED = LOW;
 	const static bool RELEASED = HIGH;

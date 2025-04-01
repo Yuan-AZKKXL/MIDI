@@ -15,6 +15,8 @@
 #define MAX_TEMPO 240
 #define MAX_STEPS 256
 #define BASIC_TIME_MS 60000
+#define MIDI_CMD_CONTROL_CHANGE 0xB0
+#define MIDI_CMD_PROGRAM_CHANGE 0xC0
 
 /* define channel begin */
 #define CHANNEL_0 0
@@ -294,7 +296,6 @@
 #define BANK1_Helicopter 126
 #define BANK1_BowedGlass 127
 #define BANK1_IceRain 128
-
 /* Drum effects (channel 10) */
 /*------------------------------------------- Defines end -------------------------------------------*/
 
