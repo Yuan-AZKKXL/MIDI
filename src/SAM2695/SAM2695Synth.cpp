@@ -6,8 +6,16 @@
 
 SAM2695Synth::SAM2695Synth()
     :_serial(nullptr)
+    ,_pitch(60)
+   ,_velocity(60)
 {
 
+}
+
+SAM2695Synth& SAM2695Synth::getInstance()
+{
+    static SAM2695Synth instance;
+    return instance;
 }
 
 void SAM2695Synth::begin(HardwareSerial* serial, int baud, uint8_t RX, uint8_t TX)
@@ -47,6 +55,50 @@ void SAM2695Synth::setAllNotesOff(uint8_t channel)
     uint8_t CMD_CONTROL_CHANGE[] = {
         (uint8_t)(MIDI_CMD_CONTROL_CHANGE | (channel & 0x0f)), 0x7b, 0x00};
     sendCMD(CMD_CONTROL_CHANGE, sizeof(CMD_CONTROL_CHANGE));
+}
+
+void SAM2695Synth::play(uint8_t channel)
+{
+    uint8_t velocity = _velocity;
+    uint8_t pitch = _pitch;
+    uint8_t CMD_NOTE_ON[] = {(uint8_t)(MIDI_COMMAND_ON | (channel & 0x0f)),
+                              pitch, velocity};
+    sendCMD(CMD_NOTE_ON, sizeof(CMD_NOTE_ON));
+}
+
+void SAM2695Synth::setPitch(uint8_t pitch)
+{
+    _pitch = pitch;
+}
+
+void SAM2695Synth::setVelocity(uint8_t velocity)
+{
+    _velocity = velocity;
+}
+
+void SAM2695Synth::increasePitch()
+{
+    _pitch++;
+    if(_pitch > BANK0_FX4atmosphere) _pitch = BANK0_FX4atmosphere;
+}
+
+void SAM2695Synth::decreasePitch()
+{
+    _pitch--;
+    if(_pitch < BANK1_Clav) _pitch = BANK1_Clav;
+}
+
+
+void SAM2695Synth::increaseVelocity()
+{
+    _velocity += VELOCITY_STEP;
+    if(_velocity > VELOCITY_MAX) _velocity = VELOCITY_MAX;
+}
+
+void SAM2695Synth::decreaseVelocity()
+{
+    _velocity -= VELOCITY_STEP;
+    if(_velocity < VELOCITY_MIN) _velocity = VELOCITY_MIN;
 }
 
 

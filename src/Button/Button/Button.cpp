@@ -19,6 +19,7 @@ __Button::__Button(uint8_t pin, uint16_t debounce_ms)
 ,  longPressThreshold_(700)
 ,  longPressFlag_(false)
 {
+	pin_ = pin;
     pinMode(pin, INPUT_PULLUP);
 }
 
@@ -28,7 +29,15 @@ void __Button::begin(){
 
 // 
 // public methods
-// 
+//
+
+// has the button been toggled from on -> off, or vice versa
+BtnAct __Button::toggled(){
+	if (has_changed()) {
+		return BtnAct::Toggled;
+	}
+	return BtnAct::None;
+}
 
 bool __Button::read(){
 	// ignore pin changes until after this delay time
@@ -44,14 +53,6 @@ bool __Button::read(){
 	}
 	
 	return state_;
-}
-
-// has the button been toggled from on -> off, or vice versa
-BtnAct __Button::toggled(){
-	if (has_changed()) {
-		return BtnAct::Toggled;
-	}
-	return BtnAct::None;
 }
 
 // mostly internal, tells you if a button has changed after calling the read() function
@@ -103,5 +104,10 @@ BtnAct __Button::longPressed(){
 		pressedTime_ = 0;
 	}
 	return BtnAct::None;   // No long press
+}
+
+uint8_t __Button::getPin() const
+{
+    return pin_;
 }
 

@@ -6,6 +6,7 @@
 #define STATEMANAGER_H
 
 #include "State.hpp"
+#include <Arduino.h>
 
 #define MAX_STATES 10
 

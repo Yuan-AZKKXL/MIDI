@@ -16,7 +16,8 @@ enum EventType
     BtnALongPressed,
     BtnBLongPressed,
     BtnCLongPressed,
-    BtnDLongPressed
+    BtnDLongPressed,
+    TimeOutEvent,
 };
 
 class Event

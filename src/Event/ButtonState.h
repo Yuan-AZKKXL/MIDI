@@ -11,18 +11,29 @@
 #include "StateMachine.h"
 #include "SAM2695/SAM2695Synth.h"
 
-SAM2695Synth seq = SAM2695Synth();;
-bool _longPressed = true;
+extern SAM2695Synth seq;
+extern hw_timer_t *timer;
+bool entryFlag = true;
+bool channel_1_flag = false;
+bool channel_2_flag = false;
+bool channel_3_flag = false;
+bool channel_4_flag = false;
 
 //模式1
 class ButtonState1 :public State{
 public:
 	enum {ID = 1};
-    ButtonState1(){ seq.begin();}
+    ButtonState1(){ }
 
-    virtual void onEnter(){ }
+    virtual void onEnter()
+    {
+	    Serial.println("enter Mode 1");
+    }
 
-    virtual void onExit(){ }
+    virtual void onExit()
+    {
+	    Serial.println("exit Mode 1");
+    }
     //处理事件
     virtual bool handleEvent(StateMachine* machine,Event* event)
     {
@@ -33,52 +44,61 @@ public:
         switch(event->getType()){
             //按键A短按
             case EventType::BtnAPressed:{
+				Serial.println("Mode 1 Button A Pressed");
 
-            }break;
+            		return true;
+            };
             //按键B短按
             case EventType::BtnBPressed:{
-
-            }break;
+            		Serial.println("Mode 1 Button B Pressed");
+            		return true;
+            };
             //按键C短按
             case EventType::BtnCPressed:{
-
-            }break;
+            		Serial.println("Mode 1 Button C Pressed");
+            		return true;
+            };
             //按键D短按
             case EventType::BtnDPressed:{
-
-            }break;
+            		Serial.println("Mode 1 Button D Pressed");
+            		return true;
+            };
             //按键A长按
             case EventType::BtnALongPressed:{
-
-            }break;
+            		Serial.println("Mode 1 Button A Long Pressed");
+            		return true;
+            };
             //按键B长按
             case EventType::BtnBLongPressed:{
-
-            }break;
+            		Serial.println("Mode 1 Button B Long Pressed");
+            		seq.decreaseVelocity();
+            		return true;
+            };
             //按键C长按
             case EventType::BtnCLongPressed:{
-
-            }break;
+            		Serial.println("Mode 1 Button C Long Pressed");
+            		seq.increaseVelocity();
+            		return true;
+            };
             //按键D长按
             case EventType::BtnDLongPressed:{
-            	//长按状态没有打开
-            	if(_longPressed == false)
-            		return false;
+            		Serial.println("Mode 1 Button D Long Pressed");
 
 				int index = 2;
             	State* nextState = StateManager::getInstance()->getState(index);
             	if(nextState != nullptr){
             		machine->changeState(nextState);
-            		//切换成功响一下，表示切换成功
-            		seq.setNoteOn(0, 60, 127);
+            		entryFlag = true;
+            		return true;
             	}
             	//关闭长按状态
-            	_longPressed = false;
+            	entryFlag = false;
             	return true;
             }
+
         	case EventType::NoEvent:{
 				//打开长按状态
-            	_longPressed = true;
+            	entryFlag = true;
             }
             default:
                 return false;
@@ -92,9 +112,15 @@ public:
 class ButtonState2 :public State{
 public:
 	enum {ID = 2};
-    virtual void onEnter(){}
+    virtual void onEnter()
+    {
+	    Serial.println("enter Mode 2");
+    }
 
-    virtual void onExit(){}
+    virtual void onExit()
+    {
+    	Serial.println("exit Mode 2");
+    }
 
     //处理事件
     virtual bool handleEvent(StateMachine* machine,Event* event){
@@ -105,54 +131,66 @@ public:
 	    switch(event->getType()){
 	        //按键A短按
 			case EventType::BtnAPressed:{
-
-	        }break;
+					Serial.println("Mode 2 Button A  Pressed");
+					return true;
+	        };
 	        //按键B短按
 			case EventType::BtnBPressed:{
-
-	        }break;
+					Serial.println("Mode 2 Button B  Pressed");
+					return true;
+	        };
 	        //按键C短按
 			case EventType::BtnCPressed:{
-
-	        }break;
+					Serial.println("Mode 2 Button C  Pressed");
+					return true;
+	        };
 	        //按键D短按
 			case EventType::BtnDPressed:{
-
-	        }break;
+					Serial.println("Mode 2 Button D  Pressed");
+					return true;
+	        };
 	        //按键A长按
 			case EventType::BtnALongPressed:{
-
-	        }break;
+					Serial.println("Mode 2 Button A Long Pressed");
+					return true;
+	        };
 	        //按键B长按
 			case EventType::BtnBLongPressed:{
-
-	        }break;
+					Serial.println("Mode 2 Button B Long Pressed");
+					seq.decreaseVelocity();
+					return true;
+	        };
 	        //按键C长按
 			case EventType::BtnCLongPressed:{
-
-	        }break;
+					Serial.println("Mode 2 Button C Long Pressed");
+					seq.increaseVelocity();
+					return true;
+	        };
 	        //按键D长按
 			case EventType::BtnDLongPressed:{
 				//长按状态没有打开
-				if(_longPressed == false)
+				Serial.println("Mode 2 Button D Long Pressed");
+				if(entryFlag == false)
+				{
 					return false;
+				}
 				int index = 3;
 				State* nextState = StateManager::getInstance()->getState(index);
 				if(nextState != nullptr){
 					machine->changeState(nextState);
-					//切换成功响一下，表示切换成功
-					seq.setNoteOn(0, 70, 127);
-					//关闭长按状态
-					_longPressed = false;
+					entryFlag = true;
+					return true;
 				}
+				//关闭长按状态
+				entryFlag = false;
 				return true;
 	        }
 		    case EventType::NoEvent:{
 				//打开长按状态
-				_longPressed = true;
-		    }break;
+				entryFlag = true;
+		    };
 			default:
-				break;
+				return false;
 	    }
 	}
     virtual int getID() const {return ID;}
@@ -163,72 +201,92 @@ public:
 class ButtonState3 :public State{
 public:
 	enum {ID = 3};
-    virtual void onEnter(){
+	virtual void onEnter()
+	{
+		Serial.println("enter Mode 3");
+	}
 
-    }
+	virtual void onExit()
+	{
+		Serial.println("exit Mode 3");
+		channel_1_flag = false;
+		channel_2_flag = false;
+		channel_3_flag = false;
+		channel_4_flag = false;
+	}
 
-    virtual void onExit(){
-
-    }
 	//处理事件
 	virtual bool handleEvent(StateMachine* machine,Event* event){
-    	if(machine == nullptr || event == nullptr){
-    		return false;
-    	}
+		if(machine == nullptr || event == nullptr){
+			return false;
+		}
 
-    	switch(event->getType()){
-    		//按键A短按
-    		case EventType::BtnAPressed:{
-    			seq.setNoteOn(0, 90, 127);
-    			return true;
-    		}
-    		//按键B短按
-    		case EventType::BtnBPressed:{
-
-    		}break;
-    		//按键C短按
-    		case EventType::BtnCPressed:{
-
-    		}break;
-    		//按键D短按
-    		case EventType::BtnDPressed:{
-
-    		}break;
-    		//按键A长按
-    		case EventType::BtnALongPressed:{
-
-    		}break;
-    		//按键B长按
-    		case EventType::BtnBLongPressed:{
-
-    		}break;
-    		//按键C长按
-    		case EventType::BtnCLongPressed:{
-
-    		}break;
-    		//按键D长按
-    		case EventType::BtnDLongPressed:{
-    			if(_longPressed == false)
-    				return false;
-    			int index = 1;
-    			State* nextState = StateManager::getInstance()->getState(index);
-    			if(nextState != nullptr){
-    				machine->changeState(nextState);
-    				//切换成功响一下，表示切换成功
-    				seq.setNoteOn(0, 80, 127);
-    				//关闭长按状态
-    				_longPressed = false;
-    			}
-    			return true;
-    		}
-    		case EventType::NoEvent:{
-    			//打开长按状态
-    			_longPressed = true;
-    		}break;
-    		default:
-    			break;
-    	}
-    }
+		switch(event->getType()){
+			//按键A短按
+		case EventType::BtnAPressed:{
+				Serial.println("Mode 3 Button A Pressed");
+				channel_1_flag = !channel_1_flag;
+				return true;
+		};
+			//按键B短按
+		case EventType::BtnBPressed:{
+	    		Serial.println("Mode 3 Button B Pressed");
+				channel_2_flag = !channel_2_flag;
+				return true;
+		};
+			//按键C短按
+		case EventType::BtnCPressed:{
+               Serial.println("Mode 3 Button C Pressed");
+				channel_3_flag = !channel_3_flag;
+				return true;
+		};
+			//按键D短按
+		case EventType::BtnDPressed:{
+    			Serial.println("Mode 3 Button D Pressed");
+				channel_4_flag = !channel_4_flag;
+				return true;
+		};
+			//按键A长按
+		case EventType::BtnALongPressed:{
+				Serial.println("Mode 3 Button A Long Pressed");
+				return true;
+		};
+			//按键B长按
+		case EventType::BtnBLongPressed:{
+    			Serial.println("Mode 3 Button B Long Pressed");
+				seq.decreaseVelocity();
+				return true;
+		};
+			//按键C长按
+		case EventType::BtnCLongPressed:{
+    			Serial.println("Mode 3 Button C Long Pressed");
+				seq.increaseVelocity();
+				return true;
+		};
+			//按键D长按
+		case EventType::BtnDLongPressed:{
+				Serial.println("Mode 3 Button D Long Pressed");
+				//长按状态没有打开
+				if(entryFlag == false)
+					return false;
+				int index = 1;
+				State* nextState = StateManager::getInstance()->getState(index);
+				if(nextState != nullptr){
+					machine->changeState(nextState);
+					//关闭长按状态
+					entryFlag = true;
+					return true;
+				}
+				return true;
+		}
+		case EventType::NoEvent:{
+				//打开长按状态
+				entryFlag = true;
+		};
+		default:
+			return false;
+		}
+	}
 	virtual int getID() const {return ID;}
 	virtual const char* getName() const {return "ButtonStateThree";};
 };

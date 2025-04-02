@@ -29,6 +29,7 @@ public:
 	BtnAct pressed();
 	BtnAct released();
 	BtnAct longPressed();
+	uint8_t getPin() const;
 
 	const static bool PRESSED = LOW;
 	const static bool RELEASED = HIGH;

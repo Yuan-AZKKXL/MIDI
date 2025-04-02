@@ -59,6 +59,9 @@ bool StateManager::registerState(State* state)
     }
     //替换
     _states[id-1] = state;
+    char name[100];  // 用一个足够大的字符数组来存储结果
+    sprintf(name, "add state : %s,%d", state->getName(), id);
+    Serial.println(name);
     return true;
 }
 

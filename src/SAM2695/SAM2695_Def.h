@@ -17,6 +17,9 @@
 #define BASIC_TIME_MS 60000
 #define MIDI_CMD_CONTROL_CHANGE 0xB0
 #define MIDI_CMD_PROGRAM_CHANGE 0xC0
+#define VELOCITY_MIN 0
+#define VELOCITY_MAX 127
+#define VELOCITY_STEP 10
 
 /* define channel begin */
 #define CHANNEL_0 0
