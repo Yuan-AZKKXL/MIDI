@@ -101,7 +101,6 @@ void SAM2695Synth::decreaseVelocity()
     if(_velocity < VELOCITY_MIN) _velocity = VELOCITY_MIN;
 }
 
-
 void SAM2695Synth::sendCMD(byte* cmd, int len)
 {
     _serial->write(cmd, len);

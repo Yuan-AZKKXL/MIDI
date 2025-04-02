@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "Event/ButtonState.h"
 #include "Button/EmmaButton.hpp"
-#include "Button/Button/ButtonInterrupt.h"
+#include "Time/Timer.h"
 
 SAM2695Synth seq = SAM2695Synth::getInstance();
 //创建状态机
@@ -9,32 +9,26 @@ StateMachine stateMachine;
 //创建按钮
 EmmaButton button;
 //定时器
-hw_timer_t *timer = nullptr;
-bool timeFlag = false;
-
-void IRAM_ATTR onTimer() {
-    // 每秒触发一次，执行的操作
-    timeFlag = true;
-}
+Timer timer = Timer::getInstance();
 
 void multiTrackPlay()
 {
-    if(timeFlag)
+    if(Timer::getInstance()._timerFlag)
     {
-        timeFlag = false;
-        if(channel_1_flag)
+        Timer::getInstance()._timerFlag = false;
+        if(channel_1_on_off_flag)
         {
             seq.play(CHANNEL_0);
         }
-        if(channel_2_flag)
+        if(channel_2_on_off_flag)
         {
             seq.play(CHANNEL_1);
         }
-        if(channel_3_flag)
+        if(channel_3_on_off_flag)
         {
             seq.play(CHANNEL_2);
         }
-        if(channel_4_flag)
+        if(channel_4_on_off_flag)
         {
             seq.play(CHANNEL_3);
         }
@@ -43,7 +37,7 @@ void multiTrackPlay()
 
 // 获取下一个输入事件
 Event* getNextEvent() {
-    if(button.A.pressed()==BtnAct::Pressed)
+    if(button.A.pressed()==BtnAct::Pressed )
     {
         Serial.println("Button A pressed");
         Event* e = new Event(EventType::BtnAPressed);
@@ -105,18 +99,8 @@ Event* getNextEvent() {
 void setup() {
     Serial.begin(115200);
     delay(3000);
-    // pinMode(EMMA_BTN_A_PIN, INPUT_PULLUP);
-    // pinMode(EMMA_BTN_B_PIN, INPUT_PULLUP);
-    // pinMode(EMMA_BTN_C_PIN, INPUT_PULLUP);
-    // pinMode(EMMA_BTN_D_PIN, INPUT_PULLUP);
-    // attachInterrupt(digitalPinToInterrupt(EMMA_BTN_A_PIN), buttonAInterrupt, FALLING);
-    // attachInterrupt(digitalPinToInterrupt(EMMA_BTN_B_PIN), buttonBInterrupt, FALLING);
-    // attachInterrupt(digitalPinToInterrupt(EMMA_BTN_C_PIN), buttonCInterrupt, FALLING);
-    // attachInterrupt(digitalPinToInterrupt(EMMA_BTN_D_PIN), buttonDInterrupt, FALLING);
-    timer = timerBegin(0, 80, true);
-    timerAttachInterrupt(timer, &onTimer, true);  // 将中断函数 onTimer 绑定到定时器
-    timerAlarmWrite(timer, 1000*1000, true);  // 设置定时器中断周期为 0.5秒 , @2以微秒为单位
-    timerAlarmEnable(timer);  // 启动定时器
+    //初始化定时器
+    timer.begin();
     //初始化音序器
     seq.begin();
     //注册状态
