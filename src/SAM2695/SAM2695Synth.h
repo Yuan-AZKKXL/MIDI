@@ -31,6 +31,12 @@ public:
     void decreasePitch();
     void increaseVelocity();
     void decreaseVelocity();
+    void increaseBpm();
+    void decreaseBpm();
+    void drumPlay(uint8_t channel);
+    void setBpm(uint8_t bpm);
+    uint8_t getBpm() const;
+
 
 private:
     SAM2695Synth();
@@ -38,9 +44,9 @@ private:
 
 private:
     HardwareSerial*   _serial;
-    Note              _note;
     uint8_t           _pitch;
     uint8_t           _velocity;
+    uint8_t           _bpm;
 };
 
 

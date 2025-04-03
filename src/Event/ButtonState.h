@@ -10,17 +10,16 @@
 #include "Event.hpp"
 #include "StateMachine.h"
 #include "SAM2695/SAM2695Synth.h"
-#include "Time/Timer.h"
 #include <cstdlib>
 #include <ctime>
 
 extern SAM2695Synth seq;
-extern Timer timer;
 bool entryFlag = true;
 bool channel_1_on_off_flag = false;
 bool channel_2_on_off_flag = false;
 bool channel_3_on_off_flag = false;
 bool channel_4_on_off_flag = false;
+bool drum_on_off_flag = false;
 
 //模式1
 class ButtonState1 :public State{
@@ -147,16 +146,19 @@ public:
 	        //按键B短按
 			case EventType::BtnBPressed:{
 					Serial.println("Mode 2 Button B  Pressed");
+					seq.decreaseBpm();
 					return true;
 	        };
 	        //按键C短按
 			case EventType::BtnCPressed:{
 					Serial.println("Mode 2 Button C  Pressed");
+					seq.increaseBpm();
 					return true;
 	        };
 	        //按键D短按
 			case EventType::BtnDPressed:{
 					Serial.println("Mode 2 Button D  Pressed");
+					drum_on_off_flag = !drum_on_off_flag;
 					return true;
 	        };
 	        //按键A长按

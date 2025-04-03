@@ -4,10 +4,12 @@
 
 #include "SAM2695Synth.h"
 
+
 SAM2695Synth::SAM2695Synth()
-    :_serial(nullptr)
-    ,_pitch(60)
-   ,_velocity(60)
+:_serial(nullptr)
+,_pitch(60)
+,_velocity(90)
+,_bpm(BPM_DEFAULT)
 {
 
 }
@@ -100,6 +102,38 @@ void SAM2695Synth::decreaseVelocity()
     _velocity -= VELOCITY_STEP;
     if(_velocity < VELOCITY_MIN) _velocity = VELOCITY_MIN;
 }
+
+void SAM2695Synth::increaseBpm()
+{
+    setBpm(_bpm + BPM_STEP);
+}
+
+void SAM2695Synth::decreaseBpm()
+{
+    setBpm(_bpm - BPM_STEP);
+}
+
+void SAM2695Synth::drumPlay(uint8_t channel)
+{
+    uint8_t velocity = _velocity;
+    uint8_t pitch = _pitch;
+}
+
+
+void SAM2695Synth::setBpm(uint8_t bpm)
+{
+    if(bpm < BPM_MIN)
+        bpm = BPM_MIN;
+    else if(bpm > BPM_MAX)
+        bpm = BPM_MAX;
+    _bpm = bpm;
+}
+
+uint8_t SAM2695Synth::getBpm() const
+{
+    return _bpm;
+}
+
 
 void SAM2695Synth::sendCMD(byte* cmd, int len)
 {

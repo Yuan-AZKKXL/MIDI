@@ -1,21 +1,26 @@
 #include <Arduino.h>
 #include "Event/ButtonState.h"
 #include "Button/EmmaButton.hpp"
-#include "Time/Timer.h"
 
+//创建音序器
 SAM2695Synth seq = SAM2695Synth::getInstance();
 //创建状态机
 StateMachine stateMachine;
 //创建按钮
 EmmaButton button;
-//定时器
-Timer timer = Timer::getInstance();
+int beatCount = 0;                // 打拍计数器
+unsigned long previousMillis = 0; // 记录上一次发送MIDI信号的时间
+int noteType = QUATER_NOTE;                 // 音符类型选择，0（四分音符）、1（八分音符）、2（十六音符）
+int beatsPerBar = BEATS_BAR_DEFAULT;              // 每小节拍数，可以是2、3或4
+bool isPressed = false;
 
 void multiTrackPlay()
 {
-    if(Timer::getInstance()._timerFlag)
+    unsigned long interval = (BASIC_TIME / seq.getBpm()) / (noteType + 1);
+    unsigned long currentMillis = millis();
+    if (currentMillis - previousMillis >= interval)
     {
-        Timer::getInstance()._timerFlag = false;
+        previousMillis = currentMillis;
         if(channel_1_on_off_flag)
         {
             seq.play(CHANNEL_0);
@@ -32,41 +37,28 @@ void multiTrackPlay()
         {
             seq.play(CHANNEL_3);
         }
+        // if(drum_on_off_flag)
+        // {
+        //     seq.drumPlay();
+        // }
     }
 }
 
 // 获取下一个输入事件
-Event* getNextEvent() {
-    if(button.A.pressed()==BtnAct::Pressed )
+Event* getNextEvent()
+{
+    //用来控制长按和短按事件，松开的时候才会触发短按，否则是长按
+    if(button.A.pressed()==BtnAct::Pressed
+        || button.B.pressed()==BtnAct::Pressed
+        || button.C.pressed()==BtnAct::Pressed
+        || button.D.pressed()==BtnAct::Pressed)
     {
-        Serial.println("Button A pressed");
-        Event* e = new Event(EventType::BtnAPressed);
-        return e;
-    }
-
-    if(button.B.pressed()==BtnAct::Pressed)
-    {
-        Serial.println("Button B pressed");
-        Event* e = new Event(EventType::BtnBPressed);
-        return e;
-    }
-
-    if(button.C.pressed()==BtnAct::Pressed)
-    {
-        Serial.println("Button C pressed");
-        Event* e = new Event(EventType::BtnCPressed);
-        return e;
-    }
-
-    if(button.D.pressed()==BtnAct::Pressed)
-    {
-        Serial.println("Button D pressed");
-        Event* e = new Event(EventType::BtnDPressed);
-        return e;
+        isPressed = true;
     }
 
     if(button.A.longPressed()==BtnAct::LongPressed)
     {
+        isPressed = false;
         Serial.println("Button A long pressed");
         Event* e = new Event(EventType::BtnALongPressed);
         return e;
@@ -74,6 +66,7 @@ Event* getNextEvent() {
 
     if(button.B.longPressed()==BtnAct::LongPressed)
     {
+        isPressed = false;
         Serial.println("Button B long pressed");
         Event* e = new Event(EventType::BtnBLongPressed);
         return e;
@@ -81,6 +74,7 @@ Event* getNextEvent() {
 
     if(button.C.longPressed()==BtnAct::LongPressed)
     {
+        isPressed = false;
         Serial.println("Button C long pressed");
         Event* e = new Event(EventType::BtnCLongPressed);
         return e;
@@ -88,9 +82,51 @@ Event* getNextEvent() {
 
     if(button.D.longPressed()==BtnAct::LongPressed)
     {
+        isPressed = false;
         Serial.println("Button D long pressed");
         Event* e = new Event(EventType::BtnDLongPressed);
         return e;
+    }
+
+    if(button.A.released()==BtnAct::Released)
+    {
+        if(isPressed)
+        {
+            isPressed = false;
+            Serial.println("Button A pressed");
+            Event* e = new Event(EventType::BtnAPressed);
+            return e;
+        }
+    }
+    if(button.B.released()==BtnAct::Released)
+    {
+        if(isPressed)
+        {
+            isPressed = false;
+            Serial.println("Button B pressed");
+            Event* e = new Event(EventType::BtnBPressed);
+            return e;
+        }
+    }
+    if(button.C.released()==BtnAct::Released)
+    {
+        if(isPressed)
+        {
+            isPressed = false;
+            Serial.println("Button C pressed");
+            Event* e = new Event(EventType::BtnCPressed);
+            return e;
+        }
+    }
+    if(button.D.released()==BtnAct::Released)
+    {
+        if(isPressed)
+        {
+            isPressed = false;
+            Serial.println("Button D pressed");
+            Event* e = new Event(EventType::BtnDPressed);
+            return e;
+        }
     }
 
     return nullptr;
@@ -99,8 +135,6 @@ Event* getNextEvent() {
 void setup() {
     Serial.begin(115200);
     delay(3000);
-    //初始化定时器
-    timer.begin();
     //初始化音序器
     seq.begin();
     //注册状态
@@ -118,7 +152,6 @@ void setup() {
         StateManager::releaseInstance();
         return ;
     }
-
     Serial.println("Button and Timer ready!");
 }
 
