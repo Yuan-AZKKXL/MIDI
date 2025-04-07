@@ -18,45 +18,45 @@ BtnState btnD = {HIGH, HIGH, 0, 0, false};
 //轨道和弦所需结构体
 const musicData channel_1_chord =
 {
-    CHANNEL_0,
+    CHANNEL_9,
     {
-        {NOTE_C4, true},
-        {NOTE_E4, true},
-        {NOTE_G4, true},
-        {NOTE_C5, false}
+        {NOTE_C2, true},
+        {NOTE_FS2, true},
     },
     VELOCITY_DEFAULT ,
-    BPM_DEFAULT + BPM_STEP,
+    500,
 };
 
 const musicData channel_2_chord =
 {
-CHANNEL_1,
+CHANNEL_9,
 {
-                {NOTE_G6, true},
+                {NOTE_FS2, true},
     },
     VELOCITY_DEFAULT ,
-    BPM_DEFAULT - BPM_STEP,
+    500,
 };
 
 const musicData channel_3_chord =
 {
-CHANNEL_1,
+CHANNEL_9,
 {
-                    {NOTE_G6, true},
+                    {NOTE_D2, true},
+                    {NOTE_FS2, true},
         },
         VELOCITY_DEFAULT ,
-        BPM_DEFAULT - BPM_STEP,
+        500,
 };
 const musicData channel_4_chord =
 {
-CHANNEL_1,
+CHANNEL_9,
 {
-                    {NOTE_G6, true},
+                    {NOTE_FS2, true},
         },
         VELOCITY_DEFAULT ,
         BPM_DEFAULT + BPM_STEP,
 };
+
 
 //创建音序器
 SAM2695Synth synth = SAM2695Synth::getInstance();
@@ -214,21 +214,19 @@ void multiTrackPlay()
         {
             if(drupCount % 4 == 0)
             {
-                synth.setNoteOn(CHANNEL_9,NOTE_C2,VELOCITY_DEFAULT);
-                synth.setNoteOn(CHANNEL_9,NOTE_FS2,VELOCITY_DEFAULT);
+                synth.playChord(channel_1_chord);
             }
             else if(drupCount % 4 == 1)
             {
-                synth.setNoteOn(CHANNEL_9,NOTE_FS2,VELOCITY_DEFAULT);
+                synth.playChord(channel_2_chord);
             }
             else if(drupCount % 4 == 2)
             {
-                synth.setNoteOn(CHANNEL_9,NOTE_D2,VELOCITY_DEFAULT);
-                synth.setNoteOn(CHANNEL_9,NOTE_FS2,VELOCITY_DEFAULT);
+                synth.playChord(channel_3_chord);
             }
             else if(drupCount % 4 == 3)
             {
-                synth.setNoteOn(CHANNEL_9,NOTE_FS2,VELOCITY_DEFAULT);
+                synth.playChord(channel_4_chord);
             }
             drupCount++;
         }

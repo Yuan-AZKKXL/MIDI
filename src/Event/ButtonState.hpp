@@ -36,12 +36,12 @@ public:
 
     virtual void onEnter()
     {
-	    Serial.println("enter Mode 1");
+	    Serial.println("enter AuditionMode");
     }
 
     virtual void onExit()
     {
-	    Serial.println("exit Mode 1");
+	    Serial.println("exit AuditionMode");
     	drum_on_off_flag = false;
     }
     //handle event
@@ -123,12 +123,12 @@ public:
 	enum {ID = 2};
     virtual void onEnter()
     {
-	    Serial.println("enter Mode 2");
+	    Serial.println("enter Mode BpmMode");
     }
 
     virtual void onExit()
     {
-    	Serial.println("exit Mode 2");
+    	Serial.println("exit Mode BpmMode");
     	drum_on_off_flag = false;
     }
 
@@ -232,12 +232,12 @@ public:
 	enum {ID = 3};
 	virtual void onEnter()
 	{
-		Serial.println("enter Mode 3");
+		Serial.println("enter Mode TrackMode");
 	}
 
 	virtual void onExit()
 	{
-		Serial.println("exit Mode 3");
+		Serial.println("exit Mode TrackMode");
 		channel_1_on_off_flag = false;
 		channel_2_on_off_flag = false;
 		channel_3_on_off_flag = false;
