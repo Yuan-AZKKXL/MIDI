@@ -101,6 +101,16 @@ void SAM2695Synth::setAllNotesOff(uint8_t channel)
     sendCMD(CMD_CONTROL_CHANGE, sizeof(CMD_CONTROL_CHANGE));
 }
 
+//todo 添加注释-播放和弦
+void SAM2695Synth::playChord(const musicData& chord)
+{
+    for (int i = 0; i < chord.beatCount; ++i) {
+        if (chord.notes[i].isOn) {
+            setNoteOn(chord.channel, chord.notes[i].pitch, chord.velocity);
+        }
+    }
+}
+
 // Sets the pitch value for the synthesizer.
 // This value will be used when the pitch is not explicitly provided during note playback.
 // Parameters:

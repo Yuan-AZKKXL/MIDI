@@ -8,10 +8,18 @@
 #include <Arduino.h>
 #include "SAM2695_Def.h"
 
-struct Note {
-    uint8_t channel;
+struct oneNote
+{
     uint8_t pitch;
+    bool    isOn;
+};
+struct musicData
+{
+    uint8_t channel;
+    oneNote notes[NOTE_COUNT_DEFAULT];
     uint8_t velocity;
+    unsigned long bpm;
+    uint8_t beatCount;
 };
 
 class SAM2695Synth {
@@ -24,6 +32,7 @@ public:
     void setNoteOn(uint8_t channel, uint8_t pitch = -1, uint8_t velocity = -1);
     void setNoteOff(uint8_t channel, uint8_t pitch, uint8_t velocity);
     void setAllNotesOff(uint8_t channel);
+    void playChord(const musicData& chord);
     void setPitch(uint8_t pitch);
     uint8_t getPitch() const;
     void setVelocity(uint8_t velocity);

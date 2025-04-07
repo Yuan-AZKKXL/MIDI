@@ -25,6 +25,9 @@
 #define BEATES_BAR_2                    2       //2/4 beat
 #define BEATS_BAR_3                     3       //3/4 beat
 #define BEATS_BAR_4                     4       //4/4 beat
+#define NOTE_COUNT_DEFAULT              4       //default note count
+#define NOTE_COUNT_MIN                  1       //min note count
+#define NOTE_COUNT_MAX                  16      //max note count
 
 
 /* define channel begin */

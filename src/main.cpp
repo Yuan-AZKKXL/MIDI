@@ -13,8 +13,6 @@ BtnState btnA = {HIGH, HIGH, 0, 0, false};
 BtnState btnB = {HIGH, HIGH, 0, 0, false};
 BtnState btnC = {HIGH, HIGH, 0, 0, false};
 BtnState btnD = {HIGH, HIGH, 0, 0, false};
-//按钮动作
-enum BtnAct act = None;
 
 //创建音序器
 SAM2695Synth synth = SAM2695Synth::getInstance();
@@ -24,18 +22,20 @@ StateMachine stateMachine;
 StateManager* manager = StateManager::getInstance();
 
 //节拍相关
-int beatCount = 0;                // 打拍计数器
-unsigned long previousMillis = 0; // 记录上一次发送MIDI信号的时间
-int noteType = QUATER_NOTE;                 // 音符类型选择，0（四分音符）、1（八分音符）、2（十六音符）
-int beatsPerBar = BEATS_BAR_DEFAULT;              // 每小节拍数，可以是2、3或4
-bool isPressed = false;
-uint8_t drupCount = 0;
-uint8_t voice = 50;
+int beatCount = 0;                                  // 打拍计数器
+unsigned long preMillisCh_1 = 0;                    // 记录轨道1上一次发送MIDI信号的时间
+unsigned long preMillisCh_2 = 0;                    // 记录轨道2上一次发送MIDI信号的时间
+unsigned long preMillisCh_3 = 0;                    // 记录轨道2上一次发送MIDI信号的时间
+unsigned long preMillisCh_4 = 0;                    // 记录轨道2上一次发送MIDI信号的时间
+int noteType = QUATER_NOTE;                         // 音符类型选择，0（四分音符）、1（八分音符）、2（十六音符）
+int beatsPerBar = BEATS_BAR_DEFAULT;                // 每小节拍数，可以是2、3或4
+uint8_t drupCount = 0;                              //鼓点轨道播放计数器
+uint8_t voice = (VELOCITY_MAX + VELOCITY_MIN) / 2;
 
 //指示灯状态
-uint8_t  modeID = 0;//模式ID
-int ledTime = 0;//LED反转时间，500ms
-unsigned long previousMillis2 = 0;//记录上一次灯的时间
+uint8_t  modeID = State1::ID;                       //模式ID
+int ledTime = STATE_1_LED_TIME;                     //LED反转时间，500ms
+unsigned long previousMillisLED = 0;                //记录上一次灯的时间
 
 //获取下一个事件
 Event* getNextEvent()
@@ -115,10 +115,59 @@ void ledShow()
         ledTime = STATE_3_LED_TIME;
     }
     unsigned long currentMillis = millis();
-    if(currentMillis - previousMillis2 >= ledTime)
+    if(currentMillis - previousMillisLED >= ledTime)
     {
-        previousMillis2 = millis();
+        previousMillisLED = millis();
         digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+    }
+}
+
+ musicData channel_1_chord = {
+    CHANNEL_0,
+    {
+                {NOTE_C4, true},
+                {NOTE_E4, true},
+                {NOTE_G4, true},
+                {NOTE_C5, false}
+    },
+    VELOCITY_MAX ,                 // velocity
+    500,                           // BPM
+    NOTE_COUNT_DEFAULT             //Note count (now is 4 -- C4,E4,G4,C5)
+};
+
+musicData channel_2_chord = {
+    CHANNEL_1,
+    {
+                {NOTE_G6, true},
+                {NOTE_E4, false},
+                {NOTE_G4, false},
+                {NOTE_C5, false}
+    },
+    VELOCITY_MAX ,                 // velocity
+    500,                           // BPM
+    NOTE_COUNT_DEFAULT             //Note count (now is 4 -- C4,E4,G4,C5)
+};
+
+//多轨播放
+void multiTrackPlay()
+{
+    unsigned long currentMillis = millis();
+    if(channel_1_on_off_flag)
+    {
+        if (currentMillis - preMillisCh_1 >= channel_1_chord.bpm)
+        {
+            preMillisCh_1 = currentMillis;
+            synth.playChord(channel_1_chord);
+        }
+    }
+
+    if(channel_2_on_off_flag)
+    {
+        if(currentMillis - preMillisCh_2 >= channel_2_chord.bpm)
+        {
+            preMillisCh_2 = currentMillis;
+            synth.playChord(channel_2_chord);
+        }
     }
 }
 
@@ -145,7 +194,7 @@ void setup()
         StateManager::releaseInstance();
         return ;
     }
-    Serial.println("ready!");
+    Serial.println("synth and state machine ready!");
 }
 
 void loop()
@@ -157,7 +206,7 @@ void loop()
         stateMachine.handleEvent(event);
         delete event;
     }
-    // multiTrackPlay();
+    multiTrackPlay();
     ledShow();
 }
 
