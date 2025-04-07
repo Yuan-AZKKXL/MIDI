@@ -1,15 +1,61 @@
 #include <Arduino.h>
 #include "Event/ButtonState.hpp"
-// #include "Button/EmmaButton.hpp"
 #include "SAM2695/SAM2695Synth.h"
 #include "Button/Button.h"
 
+//定义不同模式下的指示灯
 #define STATE_1_LED_TIME 800
 #define STATE_2_LED_TIME 400
 #define STATE_3_LED_TIME 200
 
-ButtonState button1 = {HIGH, HIGH, 0, 0, false};
-ButtonState button2 = {HIGH, HIGH, 0, 0, false};
+//定义按钮所需要的结构体
+BtnState btnA = {HIGH, HIGH, 0, 0, false};
+BtnState btnB = {HIGH, HIGH, 0, 0, false};
+BtnState btnC = {HIGH, HIGH, 0, 0, false};
+BtnState btnD = {HIGH, HIGH, 0, 0, false};
+
+//创建音序器
+SAM2695Synth synth = SAM2695Synth::getInstance();
+
+//创建状态机
+StateMachine stateMachine;
+StateManager* manager = StateManager::getInstance();
+
+//节拍相关
+int beatCount = 0;                // 打拍计数器
+unsigned long previousMillis = 0; // 记录上一次发送MIDI信号的时间
+int noteType = QUATER_NOTE;                 // 音符类型选择，0（四分音符）、1（八分音符）、2（十六音符）
+int beatsPerBar = BEATS_BAR_DEFAULT;              // 每小节拍数，可以是2、3或4
+bool isPressed = false;
+uint8_t drupCount = 0;
+uint8_t voice = 50;
+
+//指示灯状态
+uint8_t  modeID = 0;//模式ID
+int ledTime = 0;//LED反转时间，500ms
+unsigned long previousMillis2 = 0;//记录上一次灯的时间
+
+//获取下一个事件
+Event* getNextEvent()
+{
+    detectButtonEvents(BUTTON_A_PIN, btnA, shortPressFlag1, longPressFlag1, releaseFlag1);
+    if (shortPressFlag1) {
+        shortPressFlag1 = false;
+        Event* e = new Event(EventType::BtnAPressed);
+        return e;
+    }
+    if (longPressFlag1) {
+        longPressFlag1 = false;
+        Event* e = new Event(EventType::BtnALongPressed);
+        return e;
+    }
+    if (releaseFlag1) {
+        releaseFlag1 = false;
+        Event* e = new Event(EventType::BtnAReleased);
+        return e;
+    }
+    return nullptr;
+}
 
 void setup()
 {
@@ -19,85 +65,37 @@ void setup()
     pinMode(LED_BUILTIN, OUTPUT);
     initButtons();
     delay(3000);
-
+    //初始化音序器
+    synth.begin();
+    //注册按钮状态
+    manager->registerState(new State1());
+    manager->registerState(new State2());
+    manager->registerState(new State3());
+    //注册错误状态
+    ErrorState* errorState = new ErrorState();
+    manager->registerState(errorState);
+    //初始化状态机
+    if(!(stateMachine.init(manager->getState(State1::ID), errorState)))
+    {
+        StateManager::releaseInstance();
+        return ;
+    }
+    Serial.println("ready!");
 }
 
 void loop()
 {
-    // 调用按键检测函数检测第一个按键
-    detectButtonEvents(1, button1, shortPressFlag1, longPressFlag1, releaseFlag1);
-    if (shortPressFlag1) {
-        Serial.println("A Press");
-        shortPressFlag1 = false;
+    Event* event = getNextEvent();
+    //如果有输入事件，则处理
+    if(event)
+    {
+        stateMachine.handleEvent(event);
+        delete event;
     }
-    if (longPressFlag1) {
-        Serial.println("A Long Press");
-        longPressFlag1 = false;
-    }
-    if (releaseFlag1) {
-        Serial.println("A Release");
-        releaseFlag1 = false;
-    }
-
-    // 调用按键检测函数检测第二个按键
-    detectButtonEvents(BUTTON_B_PIN, button2, shortPressFlag2, longPressFlag2, releaseFlag2);
-    if (shortPressFlag2) {
-        Serial.println("B Press");
-        shortPressFlag2 = false;
-    }
-    if (longPressFlag2) {
-        Serial.println("B Long Press");
-        longPressFlag2 = false;
-    }
-    if (releaseFlag2) {
-        Serial.println("B Release");
-        releaseFlag2 = false;
-    }
-    //
-    // // 调用按键检测函数检测第三个按键
-    // detectButtonEvents(BUTTON_C_PIN, shortPressFlag3, longPressFlag3, releaseFlag3);
-    // if (shortPressFlag3) {
-    //     Serial.println("C Press");
-    // }
-    // if (longPressFlag3) {
-    //     Serial.println("C Long Press");
-    // }
-    // if (releaseFlag3) {
-    //     Serial.println("C Release");
-    // }
-    //
-    // // 调用按键检测函数检测第四个按键
-    // detectButtonEvents(BUTTON_D_PIN, shortPressFlag4, longPressFlag4, releaseFlag4);
-    // if (shortPressFlag4) {
-    //     Serial.println("D Press");
-    // }
-    // if (longPressFlag4) {
-    //     Serial.println("D Long Press");
-    // }
-    // if (releaseFlag4) {
-    //     Serial.println("D Release");
-    // }
+    // multiTrackPlay();
+    // ledShow();
 }
 
-// //创建音序器
-// SAM2695Synth synth = SAM2695Synth::getInstance();
-// //创建状态机
-// StateMachine stateMachine;
-// //创建按钮
-// EmmaButton button;
-// StateManager* manager = StateManager::getInstance();
-//
-//
-// int beatCount = 0;                // 打拍计数器
-// unsigned long previousMillis = 0; // 记录上一次发送MIDI信号的时间
-// int noteType = QUATER_NOTE;                 // 音符类型选择，0（四分音符）、1（八分音符）、2（十六音符）
-// int beatsPerBar = BEATS_BAR_DEFAULT;              // 每小节拍数，可以是2、3或4
-// bool isPressed = false;
-// uint8_t drupCount = 0;
-// uint8_t voice = 50;
-// uint8_t  modeID = 0;//模式ID
-// int ledTime = 0;//LED反转时间，500ms
-// unsigned long previousMillis2 = 0;//记录上一次灯的时间
 //
 // // 获取下一个输入事件
 // Event* getNextEvent()

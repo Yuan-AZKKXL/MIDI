@@ -32,7 +32,7 @@ void initButtons()
 }
 
 // 封装按键检测函数
-void detectButtonEvents(uint8_t buttonPin, ButtonState& button, bool& shortPressFlag, bool& longPressFlag, bool& releaseFlag) {
+void detectButtonEvents(uint8_t buttonPin, BtnState& button, bool& shortPressFlag, bool& longPressFlag, bool& releaseFlag) {
     // 读取按键状态
     int reading = digitalRead(buttonPin);
 

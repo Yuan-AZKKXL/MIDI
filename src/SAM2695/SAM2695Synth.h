@@ -21,7 +21,7 @@ public:
                uint8_t RX = 42, uint8_t TX = 43);
 
     void setInstrument(uint8_t bank, uint8_t channel, uint8_t value);
-    void setNoteOn(uint8_t channel, uint8_t pitch, uint8_t velocity);
+    void setNoteOn(uint8_t channel, uint8_t pitch = -1, uint8_t velocity = -1);
     void setNoteOff(uint8_t channel, uint8_t pitch, uint8_t velocity);
     void setAllNotesOff(uint8_t channel);
     void setPitch(uint8_t pitch);
