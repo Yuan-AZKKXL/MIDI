@@ -2,6 +2,7 @@
 #include "Event/ButtonState.hpp"
 #include "SAM2695/SAM2695Synth.h"
 #include "Button/Button.h"
+#include "Serial/SoftwareSerialClass.h"
 
 //定义不同模式下的指示灯
 #define STATE_1_LED_TIME 800
