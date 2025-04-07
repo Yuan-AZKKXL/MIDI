@@ -19,7 +19,6 @@ struct musicData
     oneNote notes[NOTE_COUNT_DEFAULT];
     uint8_t velocity;
     unsigned long bpm;
-    uint8_t beatCount;
 };
 
 class SAM2695Synth {
@@ -44,7 +43,8 @@ public:
     void decreaseBpm();
     void setBpm(uint8_t bpm);
     uint8_t getBpm() const;
-
+    void setChord(const musicData& chord);
+    musicData getChord() const;
 
 private:
     SAM2695Synth();
@@ -55,6 +55,7 @@ private:
     uint8_t           _pitch;
     uint8_t           _velocity;
     uint8_t           _bpm;
+    musicData         _chord;
 };
 
 

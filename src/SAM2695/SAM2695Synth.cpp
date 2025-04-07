@@ -104,7 +104,7 @@ void SAM2695Synth::setAllNotesOff(uint8_t channel)
 //todo 添加注释-播放和弦
 void SAM2695Synth::playChord(const musicData& chord)
 {
-    for (int i = 0; i < chord.beatCount; ++i) {
+    for (int i = 0; i < sizeof(chord.notes) / sizeof(chord.notes[0]); ++i) {
         if (chord.notes[i].isOn) {
             setNoteOn(chord.channel, chord.notes[i].pitch, chord.velocity);
         }
@@ -208,6 +208,16 @@ void SAM2695Synth::setBpm(uint8_t bpm)
 uint8_t SAM2695Synth::getBpm() const
 {
     return _bpm;
+}
+
+void SAM2695Synth::setChord(const musicData& chord)
+{
+    _chord = chord;
+}
+
+musicData SAM2695Synth::getChord() const
+{
+    return _chord;
 }
 
 // Sends a command to the serial interface.

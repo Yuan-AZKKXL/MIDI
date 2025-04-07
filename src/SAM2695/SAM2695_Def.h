@@ -17,6 +17,7 @@
 #define VELOCITY_MIN                    0       //min velocity(0~127) 0
 #define VELOCITY_MAX                    127     //max velocity(0~127) 127
 #define VELOCITY_STEP                   10      //step velocity
+#define VELOCITY_DEFAULT                64      //default velocity(0~127) 64
 #define BASIC_TIME                      60000   //The number of milliseconds corresponding to 1 minute
 #define QUATER_NOTE                     0       //Quarter note
 #define EIGHTH_NOTE                     1       //Eighth note

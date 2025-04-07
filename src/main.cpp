@@ -14,6 +14,49 @@ BtnState btnB = {HIGH, HIGH, 0, 0, false};
 BtnState btnC = {HIGH, HIGH, 0, 0, false};
 BtnState btnD = {HIGH, HIGH, 0, 0, false};
 
+//轨道和弦所需结构体
+const musicData channel_1_chord =
+{
+    CHANNEL_0,
+    {
+        {NOTE_C4, true},
+        {NOTE_E4, true},
+        {NOTE_G4, true},
+        {NOTE_C5, false}
+    },
+    VELOCITY_DEFAULT ,
+    BPM_DEFAULT + BPM_STEP,
+};
+
+const musicData channel_2_chord =
+{
+CHANNEL_1,
+{
+                {NOTE_G6, true},
+    },
+    VELOCITY_DEFAULT ,
+    BPM_DEFAULT - BPM_STEP,
+};
+
+const musicData channel_3_chord =
+{
+CHANNEL_1,
+{
+                    {NOTE_G6, true},
+        },
+        VELOCITY_DEFAULT ,
+        BPM_DEFAULT - BPM_STEP,
+};
+const musicData channel_4_chord =
+{
+CHANNEL_1,
+{
+                    {NOTE_G6, true},
+        },
+        VELOCITY_DEFAULT ,
+        BPM_DEFAULT + BPM_STEP,
+};
+
 //创建音序器
 SAM2695Synth synth = SAM2695Synth::getInstance();
 
@@ -27,10 +70,10 @@ unsigned long preMillisCh_1 = 0;                    // 记录轨道1上一次发
 unsigned long preMillisCh_2 = 0;                    // 记录轨道2上一次发送MIDI信号的时间
 unsigned long preMillisCh_3 = 0;                    // 记录轨道2上一次发送MIDI信号的时间
 unsigned long preMillisCh_4 = 0;                    // 记录轨道2上一次发送MIDI信号的时间
+unsigned long preMillisCh_drup = 0;                 // 鼓点轨道上一次发送MIDI信号的时间
 int noteType = QUATER_NOTE;                         // 音符类型选择，0（四分音符）、1（八分音符）、2（十六音符）
 int beatsPerBar = BEATS_BAR_DEFAULT;                // 每小节拍数，可以是2、3或4
 uint8_t drupCount = 0;                              //鼓点轨道播放计数器
-uint8_t voice = (VELOCITY_MAX + VELOCITY_MIN) / 2;
 
 //指示灯状态
 uint8_t  modeID = State1::ID;                       //模式ID
@@ -122,32 +165,6 @@ void ledShow()
     }
 }
 
- musicData channel_1_chord = {
-    CHANNEL_0,
-    {
-                {NOTE_C4, true},
-                {NOTE_E4, true},
-                {NOTE_G4, true},
-                {NOTE_C5, false}
-    },
-    VELOCITY_MAX ,                 // velocity
-    500,                           // BPM
-    NOTE_COUNT_DEFAULT             //Note count (now is 4 -- C4,E4,G4,C5)
-};
-
-musicData channel_2_chord = {
-    CHANNEL_1,
-    {
-                {NOTE_G6, true},
-                {NOTE_E4, false},
-                {NOTE_G4, false},
-                {NOTE_C5, false}
-    },
-    VELOCITY_MAX ,                 // velocity
-    500,                           // BPM
-    NOTE_COUNT_DEFAULT             //Note count (now is 4 -- C4,E4,G4,C5)
-};
-
 //多轨播放
 void multiTrackPlay()
 {
@@ -167,6 +184,52 @@ void multiTrackPlay()
         {
             preMillisCh_2 = currentMillis;
             synth.playChord(channel_2_chord);
+        }
+    }
+
+    if(channel_3_on_off_flag)
+    {
+        if(currentMillis - preMillisCh_3 >= channel_3_chord.bpm)
+        {
+            preMillisCh_3 = currentMillis;
+            synth.playChord(channel_3_chord);
+        }
+    }
+
+    if(channel_4_on_off_flag)
+    {
+        if(currentMillis - preMillisCh_4 >= channel_4_chord.bpm)
+        {
+            preMillisCh_4 = currentMillis;
+            synth.playChord(channel_4_chord);
+        }
+    }
+
+    unsigned long interval = (BASIC_TIME / synth.getBpm()) / (noteType + 1);
+    if (currentMillis - preMillisCh_drup >= interval)
+    {
+        preMillisCh_drup = currentMillis;
+        if(drum_on_off_flag)
+        {
+            if(drupCount % 4 == 0)
+            {
+                synth.setNoteOn(CHANNEL_9,NOTE_C2,VELOCITY_DEFAULT);
+                synth.setNoteOn(CHANNEL_9,NOTE_FS2,VELOCITY_DEFAULT);
+            }
+            else if(drupCount % 4 == 1)
+            {
+                synth.setNoteOn(CHANNEL_9,NOTE_FS2,VELOCITY_DEFAULT);
+            }
+            else if(drupCount % 4 == 2)
+            {
+                synth.setNoteOn(CHANNEL_9,NOTE_D2,VELOCITY_DEFAULT);
+                synth.setNoteOn(CHANNEL_9,NOTE_FS2,VELOCITY_DEFAULT);
+            }
+            else if(drupCount % 4 == 3)
+            {
+                synth.setNoteOn(CHANNEL_9,NOTE_FS2,VELOCITY_DEFAULT);
+            }
+            drupCount++;
         }
     }
 }
@@ -209,56 +272,6 @@ void loop()
     multiTrackPlay();
     ledShow();
 }
-
-// // 多轨播放
-// void multiTrackPlay()
-// {
-//     unsigned long interval = (BASIC_TIME / synth.getBpm()) / (noteType + 1);
-//     unsigned long currentMillis = millis();
-//     if (currentMillis - previousMillis >= interval)
-//     {
-//         previousMillis = currentMillis;
-//         if(channel_1_on_off_flag)
-//         {
-//             uint8_t pitch = synth.getPitch();
-//             synth.setNoteOn(CHANNEL_0,synth.getPitch(),voice);
-//         }
-//         if(channel_2_on_off_flag)
-//         {
-//             synth.setNoteOn(CHANNEL_1,synth.getPitch(),voice);
-//         }
-//         if(channel_3_on_off_flag)
-//         {
-//             synth.setNoteOn(CHANNEL_2,synth.getPitch(),voice);
-//         }
-//         if(channel_4_on_off_flag)
-//         {
-//             synth.setNoteOn(CHANNEL_3,synth.getPitch(),voice);
-//         }
-//         if(drum_on_off_flag)
-//         {
-//             if(drupCount % 4 == 0)
-//             {
-//                 synth.setNoteOn(CHANNEL_9,NOTE_C2,voice);
-//                 synth.setNoteOn(CHANNEL_9,NOTE_FS2,voice);
-//             }
-//             else if(drupCount % 4 == 1)
-//             {
-//                 synth.setNoteOn(CHANNEL_9,NOTE_FS2,voice);
-//             }
-//             else if(drupCount % 4 == 2)
-//             {
-//                 synth.setNoteOn(CHANNEL_9,NOTE_D2,voice);
-//                 synth.setNoteOn(CHANNEL_9,NOTE_FS2,voice);
-//             }
-//             else if(drupCount % 4 == 3)
-//             {
-//                 synth.setNoteOn(CHANNEL_9,NOTE_FS2,voice);
-//             }
-//             drupCount++;
-//         }
-//     }
-// }
 
 
 
