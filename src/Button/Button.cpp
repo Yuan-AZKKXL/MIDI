@@ -32,34 +32,28 @@ void initButtons()
 }
 
 // 封装按键检测函数
-void detectButtonEvents(uint8_t buttonPin, bool& shortPressFlag, bool& longPressFlag, bool& releaseFlag) {
-    static int buttonState;
-    static int lastButtonState = HIGH;
-    static unsigned long lastDebounceTime = 0;
-    static unsigned long pressStartTime = 0;
-    static bool longPressTriggered = false;
-
+void detectButtonEvents(uint8_t buttonPin, ButtonState& button, bool& shortPressFlag, bool& longPressFlag, bool& releaseFlag) {
     // 读取按键状态
     int reading = digitalRead(buttonPin);
 
     // 检测按键状态是否改变
-    if (reading != lastButtonState) {
-        lastDebounceTime = millis();
+    if (reading != button.lastButtonState) {
+        button.lastDebounceTime = millis();
     }
 
     // 消抖处理
-    if ((millis() - lastDebounceTime) > debounceDelay) {
-        if (reading != buttonState) {
-            buttonState = reading;
+    if ((millis() - button.lastDebounceTime) > debounceDelay) {
+        if (reading != button.buttonState) {
+            button.buttonState = reading;
 
-            if (buttonState == LOW) {
+            if (button.buttonState == LOW) {
                 // 按键按下
-                pressStartTime = millis();
-                longPressTriggered = false;
+                button.pressStartTime = millis();
+                button.longPressTriggered = false;
             } else {
                 // 按键释放
-                unsigned long pressDuration = millis() - pressStartTime;
-                if (!longPressTriggered && pressDuration < longPressTime) {
+                unsigned long pressDuration = millis() - button.pressStartTime;
+                if (!button.longPressTriggered && pressDuration < longPressTime) {
                     // 短按事件
                     shortPressFlag = true;
                 }
@@ -69,13 +63,13 @@ void detectButtonEvents(uint8_t buttonPin, bool& shortPressFlag, bool& longPress
     }
 
     // 检测长按事件
-    if (buttonState == LOW && (millis() - pressStartTime) >= longPressTime) {
-        if (!longPressTriggered) {
+    if (button.buttonState == LOW && (millis() - button.pressStartTime) >= longPressTime) {
+        if (!button.longPressTriggered) {
             longPressFlag = true;
-            longPressTriggered = true;
+            button.longPressTriggered = true;
         }
     }
 
     // 更新上一次的按键状态
-    lastButtonState = reading;
+    button.lastButtonState = reading;
 }

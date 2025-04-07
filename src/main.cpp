@@ -8,6 +8,9 @@
 #define STATE_2_LED_TIME 400
 #define STATE_3_LED_TIME 200
 
+ButtonState button1 = {HIGH, HIGH, 0, 0, false};
+ButtonState button2 = {HIGH, HIGH, 0, 0, false};
+
 void setup()
 {
     //初始化串口
@@ -22,7 +25,7 @@ void setup()
 void loop()
 {
     // 调用按键检测函数检测第一个按键
-    detectButtonEvents(1, shortPressFlag1, longPressFlag1, releaseFlag1);
+    detectButtonEvents(1, button1, shortPressFlag1, longPressFlag1, releaseFlag1);
     if (shortPressFlag1) {
         Serial.println("A Press");
         shortPressFlag1 = false;
@@ -36,17 +39,20 @@ void loop()
         releaseFlag1 = false;
     }
 
-    // // 调用按键检测函数检测第二个按键
-    // detectButtonEvents(BUTTON_B_PIN, shortPressFlag2, longPressFlag2, releaseFlag2);
-    // if (shortPressFlag2) {
-    //     Serial.println("B Press");
-    // }
-    // if (longPressFlag2) {
-    //     Serial.println("B Long Press");
-    // }
-    // if (releaseFlag2) {
-    //     Serial.println("B Release");
-    // }
+    // 调用按键检测函数检测第二个按键
+    detectButtonEvents(BUTTON_B_PIN, button2, shortPressFlag2, longPressFlag2, releaseFlag2);
+    if (shortPressFlag2) {
+        Serial.println("B Press");
+        shortPressFlag2 = false;
+    }
+    if (longPressFlag2) {
+        Serial.println("B Long Press");
+        longPressFlag2 = false;
+    }
+    if (releaseFlag2) {
+        Serial.println("B Release");
+        releaseFlag2 = false;
+    }
     //
     // // 调用按键检测函数检测第三个按键
     // detectButtonEvents(BUTTON_C_PIN, shortPressFlag3, longPressFlag3, releaseFlag3);

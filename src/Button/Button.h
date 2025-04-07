@@ -25,8 +25,16 @@ extern bool shortPressFlag4;
 extern bool longPressFlag4;
 extern bool releaseFlag4;
 
+struct ButtonState {
+    int buttonState;
+    int lastButtonState;
+    unsigned long lastDebounceTime;
+    unsigned long pressStartTime;
+    bool longPressTriggered;
+};
+
 void initButtons();
-void detectButtonEvents(uint8_t buttonPin, bool& shortPressFlag, bool& longPressFlag, bool& releaseFlag);
+void detectButtonEvents(uint8_t buttonPin, ButtonState& button, bool& shortPressFlag, bool& longPressFlag, bool& releaseFlag);
 
 
 
