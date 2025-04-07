@@ -10,18 +10,18 @@ const unsigned long debounceDelay = 50;
 const unsigned long longPressTime = 1000;
 
 // 事件标志位
-bool shortPressFlag1 = false;
-bool longPressFlag1 = false;
-bool releaseFlag1 = false;
-bool shortPressFlag2 = false;
-bool longPressFlag2 = false;
-bool releaseFlag2 = false;
-bool shortPressFlag3 = false;
-bool longPressFlag3 = false;
-bool releaseFlag3 = false;
-bool shortPressFlag4 = false;
-bool longPressFlag4 = false;
-bool releaseFlag4 = false;
+bool shortPressFlag_A = false;
+bool longPressFlag_A = false;
+bool releaseFlag_A = false;
+bool shortPressFlag_B = false;
+bool longPressFlag_B = false;
+bool releaseFlag_B = false;
+bool shortPressFlag_C = false;
+bool longPressFlag_C = false;
+bool releaseFlag_C = false;
+bool shortPressFlag_D = false;
+bool longPressFlag_D = false;
+bool releaseFlag_D = false;
 
 void initButtons()
 {

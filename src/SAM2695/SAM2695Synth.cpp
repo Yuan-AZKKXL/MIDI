@@ -133,12 +133,14 @@ void SAM2695Synth::increasePitch()
 {
     _pitch++;
     if(_pitch > NOTE_C8) _pitch = NOTE_C8;
+    setNoteOn(CHANNEL_10, _pitch, _velocity);
 }
 
 void SAM2695Synth::decreasePitch()
 {
     _pitch--;
     if(_pitch < NOTE_B0) _pitch = NOTE_B0;
+    setNoteOn(CHANNEL_10, _pitch, _velocity);
 }
 
 // Decreases the pitch value by 1, ensuring it does not go below the minimum allowed pitch.

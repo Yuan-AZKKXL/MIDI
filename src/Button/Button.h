@@ -12,18 +12,26 @@
 #define BUTTON_C_PIN 3
 #define BUTTON_D_PIN 4
 
-extern bool shortPressFlag1;
-extern bool longPressFlag1;
-extern bool releaseFlag1;
-extern bool shortPressFlag2;
-extern bool longPressFlag2;
-extern bool releaseFlag2;
-extern bool shortPressFlag3;
-extern bool longPressFlag3;
-extern bool releaseFlag3;
-extern bool shortPressFlag4;
-extern bool longPressFlag4;
-extern bool releaseFlag4;
+enum BtnAct
+{
+    None,
+    ShortPress,
+    LongPress,
+    Release
+};
+
+extern bool shortPressFlag_A;
+extern bool longPressFlag_A;
+extern bool releaseFlag_A;
+extern bool shortPressFlag_B;
+extern bool longPressFlag_B;
+extern bool releaseFlag_B;
+extern bool shortPressFlag_C;
+extern bool longPressFlag_C;
+extern bool releaseFlag_C;
+extern bool shortPressFlag_D;
+extern bool longPressFlag_D;
+extern bool releaseFlag_D;
 
 struct BtnState {
     int buttonState;
@@ -34,7 +42,8 @@ struct BtnState {
 };
 
 void initButtons();
-void detectButtonEvents(uint8_t buttonPin, BtnState& button, bool& shortPressFlag, bool& longPressFlag, bool& releaseFlag);
+// void detectButtonEvents(uint8_t buttonPin, BtnState& button, enum BtnAct& act);
+void detectButtonEvents(uint8_t buttonPin, BtnState& button, bool& shortPressFlag, bool& releaseFlag,bool& longPressFlag);
 
 
 
