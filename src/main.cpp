@@ -77,7 +77,7 @@ int beatsPerBar = BEATS_BAR_DEFAULT;                // 每小节拍数，可以�
 uint8_t drupCount = 0;                              //鼓点轨道播放计数器
 
 //指示灯状态
-uint8_t  modeID = State1::ID;                       //模式ID
+uint8_t  modeID = AuditionMode::ID;                       //模式ID
 int ledTime = STATE_1_LED_TIME;                     //LED反转时间，500ms
 unsigned long previousMillisLED = 0;                //记录上一次灯的时间
 
@@ -146,15 +146,15 @@ Event* getNextEvent()
 void ledShow()
 {
     modeID = stateMachine.getCurrentState()->getID();
-    if(modeID == State1::ID)
+    if(modeID == AuditionMode::ID)
     {
         ledTime = STATE_1_LED_TIME;
     }
-    else if(modeID == State2::ID)
+    else if(modeID == BpmMode::ID)
     {
         ledTime = STATE_2_LED_TIME;
     }
-    else if(modeID == State3::ID)
+    else if(modeID == TrackMode::ID)
     {
         ledTime = STATE_3_LED_TIME;
     }
@@ -246,14 +246,14 @@ void setup()
     //初始化音序器
     synth.begin();
     //注册按钮状态
-    manager->registerState(new State1());
-    manager->registerState(new State2());
-    manager->registerState(new State3());
+    manager->registerState(new AuditionMode());
+    manager->registerState(new BpmMode());
+    manager->registerState(new TrackMode());
     //注册错误状态
     ErrorState* errorState = new ErrorState();
     manager->registerState(errorState);
     //初始化状态机
-    if(!(stateMachine.init(manager->getState(State1::ID), errorState)))
+    if(!(stateMachine.init(manager->getState(AuditionMode::ID), errorState)))
     {
         StateManager::releaseInstance();
         return ;
