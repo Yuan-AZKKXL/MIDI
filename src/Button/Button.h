@@ -26,7 +26,7 @@ extern bool longPressFlag4;
 extern bool releaseFlag4;
 
 void initButtons();
-void detectButtonEvents(uint8_t buttonPin,  bool& shortPressFlag,  bool& longPressFlag,  bool& releaseFlag);
+void detectButtonEvents(uint8_t buttonPin, bool& shortPressFlag, bool& longPressFlag, bool& releaseFlag);
 
 
 
