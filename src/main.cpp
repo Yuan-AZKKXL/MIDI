@@ -9,13 +9,20 @@
 #define STATE_2_LED_TIME 400
 #define STATE_3_LED_TIME 200
 
-//定义按钮所需要的结构体
+//创建按钮所需要的结构体
 BtnState btnA = {HIGH, HIGH, 0, 0, false};
 BtnState btnB = {HIGH, HIGH, 0, 0, false};
 BtnState btnC = {HIGH, HIGH, 0, 0, false};
 BtnState btnD = {HIGH, HIGH, 0, 0, false};
+//定义按钮和状态机事件的数组
+ButtonFlags buttonFlags[] = {
+    {shortPressFlag_A, longPressFlag_A, releaseFlag_A, EventType::APressed, EventType::ALongPressed},
+    {shortPressFlag_B, longPressFlag_B, releaseFlag_B, EventType::BPressed, EventType::BLongPressed},
+    {shortPressFlag_C, longPressFlag_C, releaseFlag_C, EventType::CPressed, EventType::CLongPressed},
+    {shortPressFlag_D, longPressFlag_D, releaseFlag_D, EventType::DPressed, EventType::DLongPressed}
+};
 
-//轨道和弦所需结构体
+//轨道和弦所需结构体示例
 const musicData channel_1_chord =
 {
     CHANNEL_9,
@@ -60,7 +67,6 @@ CHANNEL_9,
 
 //创建音序器
 SAM2695Synth synth = SAM2695Synth::getInstance();
-
 //创建状态机
 StateMachine stateMachine;
 StateManager* manager = StateManager::getInstance();
@@ -90,55 +96,31 @@ Event* getNextEvent()
     detectButtonEvents(BUTTON_C_PIN, btnC, shortPressFlag_C, longPressFlag_C, releaseFlag_C);
     detectButtonEvents(BUTTON_D_PIN, btnD, shortPressFlag_D, longPressFlag_D, releaseFlag_D);
 
-    if (shortPressFlag_A) {
-        shortPressFlag_A = false;
-        Event* e = new Event(EventType::APressed);
-        return e;
-    }
-    if (longPressFlag_A) {
-        longPressFlag_A = false;
-        Event* e = new Event(EventType::ALongPressed);
-        return e;
-    }
-
-    if (shortPressFlag_B) {
-        shortPressFlag_B = false;
-        Event* e = new Event(EventType::BPressed);
-        return e;
-    }
-    if (longPressFlag_B) {
-        longPressFlag_B = false;
-        Event* e = new Event(EventType::BLongPressed);
-        return e;
+    // 检查短按和长按标志
+    for (const auto& flags : buttonFlags) {
+        if (flags.shortPress) {
+            flags.shortPress = false;
+            return new Event(flags.shortPressType);
+        }
+        if (flags.longPress) {
+            flags.longPress = false;
+            return new Event(flags.longPressType);
+        }
     }
 
-    if (shortPressFlag_C) {
-        shortPressFlag_C = false;
-        Event* e = new Event(EventType::CPressed);
-        return e;
-    }
-    if (longPressFlag_C) {
-        longPressFlag_C = false;
-        Event* e = new Event(EventType::CLongPressed);
-        return e;
+    // 检查释放标志
+    bool anyReleased = false;
+    for (auto& flags : buttonFlags) {
+        if (flags.release) {
+            anyReleased = true;
+            flags.release = false;
+        }
     }
 
-    if (shortPressFlag_D) {
-        shortPressFlag_D = false;
-        Event* e = new Event(EventType::DPressed);
-        return e;
-    }
-    if (longPressFlag_D) {
-        longPressFlag_D = false;
-        Event* e = new Event(EventType::DLongPressed);
-        return e;
+    if (anyReleased) {
+        return new Event(EventType::BtnReleased);
     }
 
-    if (releaseFlag_A || releaseFlag_B || releaseFlag_C || releaseFlag_D) {
-        releaseFlag_A = releaseFlag_B = releaseFlag_C = releaseFlag_D = false;
-        Event* e = new Event(EventType::BtnReleased);
-        return e;
-    }
     return nullptr;
 }
 
@@ -166,7 +148,7 @@ void ledShow()
     }
 }
 
-//多轨播放
+//多轨和弦播放
 void multiTrackPlay()
 {
     unsigned long currentMillis = millis();

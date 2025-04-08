@@ -28,7 +28,7 @@ bool isRecording = false;
 uint8_t randomNote = 0;
 
 
-//mode 1
+//AuditionMode
 class AuditionMode :public State{
 public:
 	enum {ID = 1};
@@ -53,44 +53,50 @@ public:
 
         switch(event->getType()){
             case EventType::APressed:{
-					Serial.println("Mode 1 Button A Pressed");
-            		srand(static_cast<unsigned int>(time(0)));
-            		randomNote = rand() % 128;
-            		synth.setInstrument(0,CHANNEL_0,randomNote);
-            		synth.setNoteOn(CHANNEL_0,randomNote,50);
+					Serial.println("AuditionMode Button A Pressed");
+					static uint8_t instrument = unit_synth_instrument_t::ChurchOrgan;
+            		instrument++;
+            		Serial.println("Instrument: " + String(instrument));
+            		for(int i = CHANNEL_0;i<=CHANNEL_15;i++)
+            		{
+            			synth.setInstrument(0,i,instrument);
+            		}
+            		synth.setNoteOn(CHANNEL_0,instrument,VELOCITY_MAX);
             		return true;
             };
             case EventType::BPressed:{
-            		Serial.println("Mode 1 Button B Pressed");
+            		Serial.println("AuditionMode Button B Pressed");
             		synth.decreasePitch();
+            		synth.setNoteOn(CHANNEL_10, synth.getPitch(), VELOCITY_MAX);
             		return true;
             };
             case EventType::CPressed:{
-            		Serial.println("Mode 1 Button C Pressed");
+            		Serial.println("AuditionMode Button C Pressed");
             		synth.increasePitch();
+            		synth.setNoteOn(CHANNEL_10, synth.getPitch(), VELOCITY_MAX);
             		return true;
             };
             case EventType::DPressed:{
-            		Serial.println("Mode 1 Button D Pressed");
+            		Serial.println("AuditionMode Button D Pressed");
 					drum_on_off_flag = !drum_on_off_flag;
             		return true;
             };
             case EventType::ALongPressed:{
-            		Serial.println("Mode 1 Button A Long Pressed");
+            		Serial.println("AuditionMode Button A Long Pressed");
             		return true;
             };
             case EventType::BLongPressed:{
-            		Serial.println("Mode 1 Button B Long Pressed");
+            		Serial.println("AuditionMode Button B Long Pressed");
             		synth.decreaseVelocity();
             		return true;
             };
             case EventType::CLongPressed:{
-            		Serial.println("Mode 1 Button C Long Pressed");
+            		Serial.println("AuditionMode Button C Long Pressed");
             		synth.increaseVelocity();
             		return true;
             };
             case EventType::DLongPressed:{
-            		Serial.println("Mode 1 Button D Long Pressed");
+            		Serial.println("AuditionMode Button D Long Pressed");
 					//next mode index
 					int index = 2;
 		            State* nextState = StateManager::getInstance()->getState(index);
@@ -103,7 +109,7 @@ public:
 		            return true;
             }
 		    case EventType::BtnReleased:{
-            		for(uint8_t i = 0;i<16;i++)
+            		for(uint8_t i = CHANNEL_0;i<=CHANNEL_15;i++)
             		{
             			synth.setAllNotesOff(i);
             		}
@@ -114,21 +120,21 @@ public:
 		    }
     }
     virtual int getID() const {return ID;}
-    virtual const char* getName() const {return "ButtonStateOne";}
+    virtual const char* getName() const {return "AuditionMode";}
 };
 
-//mode 2
+//BpmMode
 class BpmMode :public State{
 public:
 	enum {ID = 2};
     virtual void onEnter()
     {
-	    Serial.println("enter Mode BpmMode");
+	    Serial.println("enter BpmMode");
     }
 
     virtual void onExit()
     {
-    	Serial.println("exit Mode BpmMode");
+    	Serial.println("exit BpmMode");
     	drum_on_off_flag = false;
     }
 
@@ -140,7 +146,7 @@ public:
 
 	    switch(event->getType()){
 			case EventType::APressed:{
-					Serial.println("Mode 2 Button A  Pressed");
+					Serial.println("BpmMode Button A  Pressed");
 					//first press
 					if(!isRecording)
 					{
@@ -171,36 +177,36 @@ public:
 					return true;
 	        };
 			case EventType::BPressed:{
-					Serial.println("Mode 2 Button B  Pressed");
+					Serial.println("BpmMode Button B  Pressed");
 					synth.decreaseBpm();
 					return true;
 	        };
 			case EventType::CPressed:{
-					Serial.println("Mode 2 Button C  Pressed");
+					Serial.println("BpmMode Button C  Pressed");
 					synth.increaseBpm();
 					return true;
 	        };
 			case EventType::DPressed:{
-					Serial.println("Mode 2 Button D  Pressed");
+					Serial.println("BpmMode Button D  Pressed");
 					drum_on_off_flag = !drum_on_off_flag;
 					return true;
 	        };
 			case EventType::ALongPressed:{
-					Serial.println("Mode 2 Button A Long Pressed");
+					Serial.println("BpmMode Button A Long Pressed");
 					return true;
 	        };
 			case EventType::BLongPressed:{
-					Serial.println("Mode 2 Button B Long Pressed");
+					Serial.println("BpmMode Button B Long Pressed");
 					synth.decreaseVelocity();
 					return true;
 	        };
 			case EventType::CLongPressed:{
-					Serial.println("Mode 2 Button C Long Pressed");
+					Serial.println("BpmMode Button C Long Pressed");
 					synth.increaseVelocity();
 					return true;
 	        };
 			case EventType::DLongPressed:{
-				Serial.println("Mode 2 Button D Long Pressed");
+				Serial.println("BpmMode Button D Long Pressed");
 				if(entryFlag == false)
 				{
 					return false;
@@ -215,7 +221,7 @@ public:
 				entryFlag = false;
 				return true;
 	        }
-		    case EventType::NoEvent:{
+		    case EventType::None:{
 				entryFlag = true;
 		    };
 			default:
@@ -223,21 +229,21 @@ public:
 	    }
 	}
     virtual int getID() const {return ID;}
-    virtual const char* getName() const {return "ButtonStateTwo";};
+    virtual const char* getName() const {return "BpmMode";};
 };
 
-//mode 3
+//TrackMode
 class TrackMode :public State{
 public:
 	enum {ID = 3};
 	virtual void onEnter()
 	{
-		Serial.println("enter Mode TrackMode");
+		Serial.println("enter TrackMode");
 	}
 
 	virtual void onExit()
 	{
-		Serial.println("exit Mode TrackMode");
+		Serial.println("exit TrackMode");
 		channel_1_on_off_flag = false;
 		channel_2_on_off_flag = false;
 		channel_3_on_off_flag = false;
@@ -252,41 +258,41 @@ public:
 		switch(event->getType()){
 
 		case EventType::APressed:{
-				Serial.println("Mode 3 Button A Pressed");
+				Serial.println("TrackMode Button A Pressed");
 				channel_1_on_off_flag = !channel_1_on_off_flag;
 				return true;
 		};
 		case EventType::BPressed:{
-	    		Serial.println("Mode 3 Button B Pressed");
+	    		Serial.println("TrackMode Button B Pressed");
 				channel_2_on_off_flag = !channel_2_on_off_flag;
 				return true;
 		};
 		case EventType::CPressed:{
-               Serial.println("Mode 3 Button C Pressed");
+               Serial.println("TrackMode Button C Pressed");
 				channel_3_on_off_flag = !channel_3_on_off_flag;
 				return true;
 		};
 		case EventType::DPressed:{
-    			Serial.println("Mode 3 Button D Pressed");
+    			Serial.println("TrackMode Button D Pressed");
 				channel_4_on_off_flag = !channel_4_on_off_flag;
 				return true;
 		};
 		case EventType::ALongPressed:{
-				Serial.println("Mode 3 Button A Long Pressed");
+				Serial.println("TrackMode Button A Long Pressed");
 				return true;
 		};
 		case EventType::BLongPressed:{
-    			Serial.println("Mode 3 Button B Long Pressed");
+    			Serial.println("TrackMode Button B Long Pressed");
 				synth.decreaseVelocity();
 				return true;
 		};
 		case EventType::CLongPressed:{
-    			Serial.println("Mode 3 Button C Long Pressed");
+    			Serial.println("TrackMode Button C Long Pressed");
 				synth.increaseVelocity();
 				return true;
 		};
 		case EventType::DLongPressed:{
-				Serial.println("Mode 3 Button D Long Pressed");
+				Serial.println("TrackMode Button D Long Pressed");
 				if(entryFlag == false)
 					return false;
 				int index = 1;
@@ -298,7 +304,7 @@ public:
 				}
 				return true;
 		}
-		case EventType::NoEvent:{
+		case EventType::None:{
 				entryFlag = true;
 		};
 		default:
@@ -306,12 +312,12 @@ public:
 		}
 	}
 	virtual int getID() const {return ID;}
-	virtual const char* getName() const {return "ButtonStateThree";};
+	virtual const char* getName() const {return "TrackMode";};
 };
 
 
 //error mode
-class ErrorState :public TrackMode
+class ErrorState :public State
 {
 public:
     enum{ID = 100};
