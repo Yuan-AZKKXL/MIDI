@@ -5,9 +5,9 @@
 #ifndef BUTTONSTATE_H
 #define BUTTONSTATE_H
 
-#include "State.hpp"
+#include "State.h"
 #include "StateManager.h"
-#include "Event.hpp"
+#include "Event.h"
 #include "StateMachine.h"
 #include "SAM2695/SAM2695Synth.h"
 

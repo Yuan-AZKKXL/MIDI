@@ -5,7 +5,7 @@
 #ifndef EVENTPOOL_H
 #define EVENTPOOL_H
 
-#include "Event.hpp"
+#include "Event.h"
 
 // 事件池的大小，假设最多支持3个事件
 #define EVENT_POOL_SIZE 3

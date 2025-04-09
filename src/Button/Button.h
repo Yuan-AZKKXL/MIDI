@@ -6,7 +6,7 @@
 #define BUTTON_H
 
 #include <Arduino.h>
-#include "Event/Event.hpp"
+#include "Event/Event.h"
 
 #define BUTTON_A_PIN 1
 #define BUTTON_B_PIN 2
