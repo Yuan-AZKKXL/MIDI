@@ -6,6 +6,7 @@
 #include "Event/BpmMode.h"
 #include "Event/TrackMode.h"
 #include "Event/ErrorState.h"
+#include "Serial/SoftwareSerial.h"
 
 //定义不同模式下的指示灯
 #define STATE_1_LED_TIME 800
