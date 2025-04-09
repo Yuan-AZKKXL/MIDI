@@ -41,6 +41,7 @@ private:
     uint8_t           _pitch;
     uint8_t           _velocity;
     uint8_t           _bpm;
+
 };
 
 

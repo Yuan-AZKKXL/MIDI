@@ -16,7 +16,7 @@ public:
 
     //init state mechine
     bool init(State* initialState, State* errorState);
-    //handle event 
+    //handle event
     bool handleEvent(const Event* event);
     //toggle to next state
     bool changeState(State* newState);

@@ -47,7 +47,7 @@ bool StateMachine::handleEvent(const Event* event)
         return false;
     }
 
-    // Prevent processing the event again 
+    // Prevent processing the event again
     //when the state transition is triggered during event handling.
     if(_transitioningInProgress)
     {

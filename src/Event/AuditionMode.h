@@ -32,11 +32,11 @@ extern uint8_t randomNote;
 class AuditionMode :public State{
 public:
 	enum {ID = 1};
-    AuditionMode();
+	AuditionMode();
 	virtual void onEnter();
 	virtual void onExit();
 	//handle event
-    virtual bool handleEvent(StateMachine* machine,Event* event);
+	virtual bool handleEvent(StateMachine* machine,Event* event);
 	virtual int getID() const;
 	virtual const char* getName() const;
 };
