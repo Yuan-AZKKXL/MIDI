@@ -15,13 +15,14 @@ public:
     void sendByte(byte data);
     byte receiveByte();
 private:
-    byte rxPin;
-    byte txPin;
     unsigned long bitDelay;
     void startBit();
     void stopBit();
     void sendBit(bool bit);
     bool receiveBit();
+private:
+    byte rxPin;
+    byte txPin;
 };
 
 
