@@ -1,9 +1,11 @@
 #include <Arduino.h>
-#include "Event/ButtonState.hpp"
+#include "Event/AuditionMode.h"
 #include "SAM2695/SAM2695Synth.h"
 #include "Button/Button.h"
-#include "Serial/SoftwareSerialClass.h"
 #include "Event/EventPool.h"
+#include "Event/BpmMode.h"
+#include "Event/TrackMode.h"
+#include "Event/ErrorState.h"
 
 //定义不同模式下的指示灯
 #define STATE_1_LED_TIME 800
