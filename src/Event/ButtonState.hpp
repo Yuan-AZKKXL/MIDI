@@ -54,26 +54,24 @@ public:
         switch(event->getType()){
             case EventType::APressed:{
 					Serial.println("AuditionMode Button A Pressed");
-					static uint8_t instrument = unit_synth_instrument_t::ChurchOrgan;
+					static uint8_t instrument = unit_synth_instrument_t::StringEnsemble2;
             		instrument++;
             		Serial.println("Instrument: " + String(instrument));
-            		for(int i = CHANNEL_0;i<=CHANNEL_15;i++)
-            		{
-            			synth.setInstrument(0,i,instrument);
-            		}
-            		synth.setNoteOn(CHANNEL_0,instrument,VELOCITY_MAX);
+            		synth.setInstrument(0,CHANNEL_0,instrument);
+            		synth.setPitch(instrument);
+            		synth.setNoteOn(CHANNEL_0,synth.getPitch(),VELOCITY_MAX);
             		return true;
             };
             case EventType::BPressed:{
             		Serial.println("AuditionMode Button B Pressed");
             		synth.decreasePitch();
-            		synth.setNoteOn(CHANNEL_10, synth.getPitch(), VELOCITY_MAX);
+            		synth.setNoteOn(CHANNEL_0, synth.getPitch(), VELOCITY_MAX);
             		return true;
             };
             case EventType::CPressed:{
             		Serial.println("AuditionMode Button C Pressed");
             		synth.increasePitch();
-            		synth.setNoteOn(CHANNEL_10, synth.getPitch(), VELOCITY_MAX);
+            		synth.setNoteOn(CHANNEL_0, synth.getPitch(), VELOCITY_MAX);
             		return true;
             };
             case EventType::DPressed:{

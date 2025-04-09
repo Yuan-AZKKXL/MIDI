@@ -3,6 +3,7 @@
 #include "SAM2695/SAM2695Synth.h"
 #include "Button/Button.h"
 #include "Serial/SoftwareSerialClass.h"
+#include "Event/EventPool.h"
 
 //定义不同模式下的指示灯
 #define STATE_1_LED_TIME 800
@@ -87,7 +88,9 @@ uint8_t  modeID = AuditionMode::ID;                       //模式ID
 int ledTime = STATE_1_LED_TIME;                     //LED反转时间，500ms
 unsigned long previousMillisLED = 0;                //记录上一次灯的时间
 
-//获取下一个事件
+EventPool eventPool;
+
+// //获取下一个事件
 Event* getNextEvent()
 {
     // detectButtonEvents(BUTTON_A_PIN, btnA, act);
@@ -100,15 +103,14 @@ Event* getNextEvent()
     for (const auto& flags : buttonFlags) {
         if (flags.shortPress) {
             flags.shortPress = false;
-            return new Event(flags.shortPressType);
+            return eventPool.getEvent(flags.shortPressType);
         }
         if (flags.longPress) {
             flags.longPress = false;
-            return new Event(flags.longPressType);
+            return eventPool.getEvent(flags.longPressType);
         }
     }
 
-    // 检查释放标志
     bool anyReleased = false;
     for (auto& flags : buttonFlags) {
         if (flags.release) {
@@ -118,7 +120,7 @@ Event* getNextEvent()
     }
 
     if (anyReleased) {
-        return new Event(EventType::BtnReleased);
+        return eventPool.getEvent(EventType::BtnReleased);
     }
 
     return nullptr;
@@ -248,7 +250,7 @@ void loop()
     if(event)
     {
         stateMachine.handleEvent(event);
-        delete event;
+        eventPool.recycleEvent(event);
     }
     multiTrackPlay();
     ledShow();

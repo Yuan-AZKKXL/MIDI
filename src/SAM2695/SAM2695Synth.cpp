@@ -54,7 +54,6 @@ void SAM2695Synth::setInstrument(uint8_t bank, uint8_t channel, uint8_t value)
     uint8_t CMD_PROGRAM_CHANGE_2[] = {
         (uint8_t)(MIDI_CMD_PROGRAM_CHANGE | (channel & 0x0f)), value};
     sendCMD(CMD_PROGRAM_CHANGE_2, sizeof(CMD_PROGRAM_CHANGE_2));
-    setPitch(value);
 }
 
 // Sends a MIDI "Note On" message to trigger a note on a specific MIDI channel
