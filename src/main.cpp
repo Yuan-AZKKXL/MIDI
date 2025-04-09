@@ -71,7 +71,155 @@ CHANNEL_9,
     3
 };
 
-musicData arr[] = {channel_1_chord, channel_2_chord, channel_3_chord, channel_4_chord};
+musicData track2[] = {
+    {CHANNEL_9,
+     {
+         {36, true}, // Kick drum note
+     },
+     VELOCITY_DEFAULT,
+     167,
+     0},
+    {CHANNEL_9,
+     {
+         {42, true}, // Closed hi-hat note
+     },
+     VELOCITY_DEFAULT,
+     137,
+     1},
+    {CHANNEL_9,
+     {
+         {36, true}, // Kick drum note
+     },
+     VELOCITY_DEFAULT,
+     197,
+     2},
+    {CHANNEL_9,
+     {
+         {38, true}, // Snare drum note
+     },
+     VELOCITY_DEFAULT,
+     167,
+     3},
+    {CHANNEL_9,
+     {
+         {42, true}, // Closed hi-hat note
+     },
+     VELOCITY_DEFAULT,
+     167,
+     4},
+    {CHANNEL_9,
+     {
+         {36, true}, // Kick drum note
+     },
+     VELOCITY_DEFAULT,
+     167,
+     5},
+    {CHANNEL_9,
+     {
+         {42, true}, // Closed hi-hat note
+     },
+     VELOCITY_DEFAULT,
+     167,
+     6},
+    {CHANNEL_9,
+     {
+         {36, true}, // Kick drum note
+     },
+     VELOCITY_DEFAULT,
+     167,
+     7},
+    {CHANNEL_9,
+     {
+         {42, true}, // Closed hi-hat note
+     },
+     VELOCITY_DEFAULT,
+     167,
+     8},
+    {CHANNEL_9,
+     {
+         {42, true}, // Closed hi-hat note
+     },
+     VELOCITY_DEFAULT,
+     167,
+     9},
+    {CHANNEL_9,
+     {
+         {38, true}, // Snare drum note
+     },
+     VELOCITY_DEFAULT,
+     167,
+     10},
+    {CHANNEL_9,
+     {
+         {42, true}, // Closed hi-hat note
+     },
+     VELOCITY_DEFAULT,
+     167,
+     11},
+    {CHANNEL_9,
+     {
+         {36, true}, // Kick drum note
+     },
+     VELOCITY_DEFAULT,
+     200,
+     12},
+    {CHANNEL_9,
+     {
+         {42, true}, // Closed hi-hat note
+     },
+     VELOCITY_DEFAULT,
+     100,
+     13},
+    {CHANNEL_9,
+     {
+         {38, true}, // Snare drum note
+     },
+     VELOCITY_DEFAULT,
+     200,
+     14},
+    {CHANNEL_9,
+     {
+         {42, true}, // Closed hi-hat note
+     },
+     VELOCITY_DEFAULT,
+     100,
+     15},
+    {CHANNEL_9,
+     {
+         {36, true}, // Kick drum note
+     },
+     VELOCITY_DEFAULT,
+     100,
+     16},
+    {CHANNEL_9,
+     {
+         {42, true}, // Closed hi-hat note
+     },
+     VELOCITY_DEFAULT,
+     100,
+     17},
+    {CHANNEL_9,
+     {
+         {36, true}, // Kick drum note
+     },
+     VELOCITY_DEFAULT,
+     300,
+     18},
+    {CHANNEL_9,
+     {
+         {38, true}, // Snare drum note
+     },
+     VELOCITY_DEFAULT,
+     200,
+     19},
+    {CHANNEL_9,
+     {
+         {42, true}, // Closed hi-hat note
+     },
+     VELOCITY_DEFAULT,
+     100,
+     20},
+};
 
 //创建音序器
 SAM2695Synth synth = SAM2695Synth::getInstance();
@@ -163,7 +311,7 @@ void multiTrackPlay()
     unsigned long currentMillis = millis();
     if(channel_1_on_off_flag)
     {
-        if (currentMillis - preMillisCh_1 >= channel_1_chord.bpm)
+        if (currentMillis - preMillisCh_1 >= channel_1_chord.delay)
         {
             preMillisCh_1 = currentMillis;
             synth.playChord(channel_1_chord);
@@ -172,7 +320,7 @@ void multiTrackPlay()
 
     if(channel_2_on_off_flag)
     {
-        if(currentMillis - preMillisCh_2 >= channel_2_chord.bpm)
+        if(currentMillis - preMillisCh_2 >= channel_2_chord.delay)
         {
             preMillisCh_2 = currentMillis;
             synth.playChord(channel_2_chord);
@@ -181,7 +329,7 @@ void multiTrackPlay()
 
     if(channel_3_on_off_flag)
     {
-        if(currentMillis - preMillisCh_3 >= channel_3_chord.bpm)
+        if(currentMillis - preMillisCh_3 >= channel_3_chord.delay)
         {
             preMillisCh_3 = currentMillis;
             synth.playChord(channel_3_chord);
@@ -190,7 +338,7 @@ void multiTrackPlay()
 
     if(channel_4_on_off_flag)
     {
-        if(currentMillis - preMillisCh_4 >= channel_4_chord.bpm)
+        if(currentMillis - preMillisCh_4 >= channel_4_chord.delay)
         {
             preMillisCh_4 = currentMillis;
             synth.playChord(channel_4_chord);
@@ -203,11 +351,12 @@ void multiTrackPlay()
         preMillisCh_drup = currentMillis;
         if(drum_on_off_flag)
         {
-            if(arr[drupCount].index == drupCount)
+            if(track2[drupCount].index == drupCount)
             {
-                synth.playChord(arr[drupCount]);
+                Serial.println(String(track2[drupCount].index));
+                synth.playChord(track2[drupCount]);
             }
-            drupCount = (drupCount+1)%4;
+            drupCount = (drupCount+1) % (sizeof(track2)/sizeof(track2[0]));
         }
     }
 }
