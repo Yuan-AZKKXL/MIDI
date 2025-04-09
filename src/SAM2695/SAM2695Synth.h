@@ -30,6 +30,7 @@ public:
     void decreaseBpm();
     void setBpm(uint8_t bpm);
     uint8_t getBpm() const;
+    unsigned long bpmToMs(uint8_t bpm);
 
 private:
     SAM2695Synth();
@@ -40,7 +41,6 @@ private:
     uint8_t           _pitch;
     uint8_t           _velocity;
     uint8_t           _bpm;
-    musicData         _chord;
 };
 
 

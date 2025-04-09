@@ -238,6 +238,13 @@ uint8_t SAM2695Synth::getBpm() const
     return _bpm;
 }
 
+unsigned long SAM2695Synth::bpmToMs(uint8_t bpm)
+{
+    setBpm(bpm);
+    unsigned long interval = (BASIC_TIME / getBpm());
+    return interval;
+}
+
 // Sends a command to the serial interface.
 // This function sends a byte array (cmd) of a specified length (len) through the serial port.
 // It uses the _serial object's write method to transmit the command data.

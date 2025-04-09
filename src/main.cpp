@@ -2,7 +2,6 @@
 #include "Event/AuditionMode.h"
 #include "SAM2695/SAM2695Synth.h"
 #include "Button/Button.h"
-#include "Event/EventPool.h"
 #include "Event/BpmMode.h"
 #include "Event/TrackMode.h"
 #include "Event/ErrorState.h"
@@ -11,6 +10,7 @@
 #define STATE_1_LED_TIME 800
 #define STATE_2_LED_TIME 400
 #define STATE_3_LED_TIME 200
+#define LED_PIN LED_BUILTIN
 
 //创建按钮所需要的结构体
 BtnState btnA = {HIGH, HIGH, 0, 0, false};
@@ -34,7 +34,7 @@ const musicData channel_1_chord =
         {NOTE_FS2, true},
     },
     VELOCITY_DEFAULT ,
-    500,
+    synth.bpmToMs(BPM_DEFAULT),
     0,
 };
 
@@ -45,7 +45,7 @@ CHANNEL_9,
                 {NOTE_FS2, true},
     },
     VELOCITY_DEFAULT ,
-    500,
+    synth.bpmToMs(BPM_DEFAULT),
     1
 };
 
@@ -57,7 +57,7 @@ CHANNEL_9,
                     {NOTE_FS2, true},
         },
         VELOCITY_DEFAULT ,
-        500,
+    synth.bpmToMs(BPM_DEFAULT),
     2
 };
 const musicData channel_4_chord =
@@ -67,159 +67,10 @@ CHANNEL_9,
                     {NOTE_FS2, true},
         },
         VELOCITY_DEFAULT ,
-        BPM_DEFAULT + BPM_STEP,
+        synth.bpmToMs(BPM_DEFAULT),
     3
 };
-
-musicData track2[] = {
-    {CHANNEL_9,
-     {
-         {36, true}, // Kick drum note
-     },
-     VELOCITY_DEFAULT,
-     167,
-     0},
-    {CHANNEL_9,
-     {
-         {42, true}, // Closed hi-hat note
-     },
-     VELOCITY_DEFAULT,
-     137,
-     1},
-    {CHANNEL_9,
-     {
-         {36, true}, // Kick drum note
-     },
-     VELOCITY_DEFAULT,
-     197,
-     2},
-    {CHANNEL_9,
-     {
-         {38, true}, // Snare drum note
-     },
-     VELOCITY_DEFAULT,
-     167,
-     3},
-    {CHANNEL_9,
-     {
-         {42, true}, // Closed hi-hat note
-     },
-     VELOCITY_DEFAULT,
-     167,
-     4},
-    {CHANNEL_9,
-     {
-         {36, true}, // Kick drum note
-     },
-     VELOCITY_DEFAULT,
-     167,
-     5},
-    {CHANNEL_9,
-     {
-         {42, true}, // Closed hi-hat note
-     },
-     VELOCITY_DEFAULT,
-     167,
-     6},
-    {CHANNEL_9,
-     {
-         {36, true}, // Kick drum note
-     },
-     VELOCITY_DEFAULT,
-     167,
-     7},
-    {CHANNEL_9,
-     {
-         {42, true}, // Closed hi-hat note
-     },
-     VELOCITY_DEFAULT,
-     167,
-     8},
-    {CHANNEL_9,
-     {
-         {42, true}, // Closed hi-hat note
-     },
-     VELOCITY_DEFAULT,
-     167,
-     9},
-    {CHANNEL_9,
-     {
-         {38, true}, // Snare drum note
-     },
-     VELOCITY_DEFAULT,
-     167,
-     10},
-    {CHANNEL_9,
-     {
-         {42, true}, // Closed hi-hat note
-     },
-     VELOCITY_DEFAULT,
-     167,
-     11},
-    {CHANNEL_9,
-     {
-         {36, true}, // Kick drum note
-     },
-     VELOCITY_DEFAULT,
-     200,
-     12},
-    {CHANNEL_9,
-     {
-         {42, true}, // Closed hi-hat note
-     },
-     VELOCITY_DEFAULT,
-     100,
-     13},
-    {CHANNEL_9,
-     {
-         {38, true}, // Snare drum note
-     },
-     VELOCITY_DEFAULT,
-     200,
-     14},
-    {CHANNEL_9,
-     {
-         {42, true}, // Closed hi-hat note
-     },
-     VELOCITY_DEFAULT,
-     100,
-     15},
-    {CHANNEL_9,
-     {
-         {36, true}, // Kick drum note
-     },
-     VELOCITY_DEFAULT,
-     100,
-     16},
-    {CHANNEL_9,
-     {
-         {42, true}, // Closed hi-hat note
-     },
-     VELOCITY_DEFAULT,
-     100,
-     17},
-    {CHANNEL_9,
-     {
-         {36, true}, // Kick drum note
-     },
-     VELOCITY_DEFAULT,
-     300,
-     18},
-    {CHANNEL_9,
-     {
-         {38, true}, // Snare drum note
-     },
-     VELOCITY_DEFAULT,
-     200,
-     19},
-    {CHANNEL_9,
-     {
-         {42, true}, // Closed hi-hat note
-     },
-     VELOCITY_DEFAULT,
-     100,
-     20},
-};
+musicData track2[] = {channel_1_chord, channel_2_chord, channel_3_chord, channel_4_chord};
 
 //创建音序器
 SAM2695Synth synth = SAM2695Synth::getInstance();
@@ -243,7 +94,9 @@ uint8_t  modeID = AuditionMode::ID;                       //模式ID
 int ledTime = STATE_1_LED_TIME;                     //LED反转时间，500ms
 unsigned long previousMillisLED = 0;                //记录上一次灯的时间
 
-EventPool eventPool;
+// 事件数组的大小
+#define EVENT_ARR_SIZE  3
+Event eventArray[EVENT_ARR_SIZE];
 
 // //获取下一个事件
 Event* getNextEvent()
@@ -258,11 +111,26 @@ Event* getNextEvent()
     for (const auto& flags : buttonFlags) {
         if (flags.shortPress) {
             flags.shortPress = false;
-            return eventPool.getEvent(flags.shortPressType);
+            Serial.println("short press");
+            for (int i = 0; i < EVENT_ARR_SIZE; i++) {
+                if (!eventArray[i].isInUse()) {
+                    eventArray[i].setType(flags.shortPressType);
+                    eventArray[i].setInUse(true);
+                    return &eventArray[i];
+                }
+            }
+
         }
         if (flags.longPress) {
             flags.longPress = false;
-            return eventPool.getEvent(flags.longPressType);
+            for (int i = 0; i < EVENT_ARR_SIZE; i++) {
+                if (!eventArray[i].isInUse()) {
+                    eventArray[i].setType(flags.longPressType);
+                    eventArray[i].setInUse(true);
+                    return &eventArray[i];
+                }
+            }
+            // return eventPool.getEvent(flags.longPressType);
         }
     }
 
@@ -275,10 +143,25 @@ Event* getNextEvent()
     }
 
     if (anyReleased) {
-        return eventPool.getEvent(EventType::BtnReleased);
+        for (int i = 0; i < EVENT_ARR_SIZE; i++) {
+            if (!eventArray[i].isInUse()) {
+                eventArray[i].setType(EventType::BtnReleased);
+                eventArray[i].setInUse(true);
+                return &eventArray[i];
+            }
+        }
+        // return eventPool.getEvent(EventType::BtnReleased);
     }
 
     return nullptr;
+}
+
+//回收事件
+void recycleEvent(Event* event) {
+    if (event) {
+        event->setType(EventType::None);
+        event->setInUse(false);  // 标记事件为未使用
+    }
 }
 
 //灯光显示
@@ -301,7 +184,7 @@ void ledShow()
     if(currentMillis - previousMillisLED >= ledTime)
     {
         previousMillisLED = millis();
-        digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+        digitalWrite(LED_PIN, !digitalRead(LED_PIN));
     }
 }
 
@@ -311,7 +194,7 @@ void multiTrackPlay()
     unsigned long currentMillis = millis();
     if(channel_1_on_off_flag)
     {
-        if (currentMillis - preMillisCh_1 >= channel_1_chord.delay)
+        if (currentMillis - preMillisCh_1 >= channel_1_chord.bpm)
         {
             preMillisCh_1 = currentMillis;
             synth.playChord(channel_1_chord);
@@ -320,7 +203,7 @@ void multiTrackPlay()
 
     if(channel_2_on_off_flag)
     {
-        if(currentMillis - preMillisCh_2 >= channel_2_chord.delay)
+        if(currentMillis - preMillisCh_2 >= channel_2_chord.bpm)
         {
             preMillisCh_2 = currentMillis;
             synth.playChord(channel_2_chord);
@@ -329,7 +212,7 @@ void multiTrackPlay()
 
     if(channel_3_on_off_flag)
     {
-        if(currentMillis - preMillisCh_3 >= channel_3_chord.delay)
+        if(currentMillis - preMillisCh_3 >= channel_3_chord.bpm)
         {
             preMillisCh_3 = currentMillis;
             synth.playChord(channel_3_chord);
@@ -338,7 +221,7 @@ void multiTrackPlay()
 
     if(channel_4_on_off_flag)
     {
-        if(currentMillis - preMillisCh_4 >= channel_4_chord.delay)
+        if(currentMillis - preMillisCh_4 >= channel_4_chord.bpm)
         {
             preMillisCh_4 = currentMillis;
             synth.playChord(channel_4_chord);
@@ -353,7 +236,6 @@ void multiTrackPlay()
         {
             if(track2[drupCount].index == drupCount)
             {
-                Serial.println(String(track2[drupCount].index));
                 synth.playChord(track2[drupCount]);
             }
             drupCount = (drupCount+1) % (sizeof(track2)/sizeof(track2[0]));
@@ -366,7 +248,7 @@ void setup()
     //初始化串口
     Serial.begin(115200);
     //初始化LED
-    pinMode(LED_BUILTIN, OUTPUT);
+    pinMode(LED_PIN, OUTPUT);
     initButtons();
     delay(3000);
     //初始化音序器
@@ -394,7 +276,7 @@ void loop()
     if(event)
     {
         stateMachine.handleEvent(event);
-        eventPool.recycleEvent(event);
+        recycleEvent(event);
     }
     multiTrackPlay();
     ledShow();
