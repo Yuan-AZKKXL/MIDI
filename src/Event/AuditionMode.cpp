@@ -15,7 +15,7 @@ unsigned long btnPressStartTime  = 0;
 uint8_t buttonPressCount = 0;
 bool isRecording = false;
 uint8_t randomNote = 0;
-
+uint8_t instrument = 0;
 AuditionMode::AuditionMode()
 {
 
@@ -32,7 +32,7 @@ void AuditionMode::onExit()
     drum_on_off_flag = false;
 }
 
-bool AuditionMode::handleEvent(StateMachine* machine, Event* event)
+bool AuditionMode::handleEvent(StateMachine* machine,Event* event)
 {
     if(machine == nullptr || event == nullptr){
         return false;
@@ -41,24 +41,27 @@ bool AuditionMode::handleEvent(StateMachine* machine, Event* event)
     switch(event->getType()){
     case EventType::APressed:{
         Serial.println("AuditionMode Button A Pressed");
-        static uint8_t instrument = unit_synth_instrument_t::StringEnsemble2;
-        instrument++;
+
         Serial.println("Instrument: " + String(instrument));
         synth.setInstrument(0,CHANNEL_0,instrument);
-        synth.setPitch(instrument);
-        synth.setNoteOn(CHANNEL_0,synth.getPitch(),VELOCITY_MAX);
+        synth.setNoteOn(CHANNEL_0,64,100);
+        instrument++;
+        if(instrument>Gunshot)
+        {
+            instrument = GrandPiano_1;
+        }
         return true;
     };
     case EventType::BPressed:{
         Serial.println("AuditionMode Button B Pressed");
         synth.decreasePitch();
-        synth.setNoteOn(CHANNEL_0, synth.getPitch(), VELOCITY_MAX);
+        synth.setNoteOn(CHANNEL_0, synth.getPitch(), 64);
         return true;
     };
     case EventType::CPressed:{
         Serial.println("AuditionMode Button C Pressed");
         synth.increasePitch();
-        synth.setNoteOn(CHANNEL_0, synth.getPitch(), VELOCITY_MAX);
+        synth.setNoteOn(CHANNEL_0, synth.getPitch(), 64);
         return true;
     };
     case EventType::DPressed:{
@@ -94,10 +97,8 @@ bool AuditionMode::handleEvent(StateMachine* machine, Event* event)
         return true;
     }
     case EventType::BtnReleased:{
-        for(uint8_t i = CHANNEL_0;i<=CHANNEL_15;i++)
-        {
-            synth.setAllNotesOff(i);
-        }
+        delay(50);
+        synth.setAllNotesOff(CHANNEL_0);
         entryFlag = true;
     }
     default:

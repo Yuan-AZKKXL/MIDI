@@ -22,7 +22,7 @@ void TrackMode::onExit()
     channel_4_on_off_flag = false;
 }
 
-bool TrackMode::handleEvent(StateMachine* machine, Event* event)
+bool TrackMode::handleEvent(StateMachine* machine,Event* event)
 {
     if (machine == nullptr || event == nullptr)
     {

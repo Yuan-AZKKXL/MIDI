@@ -8,14 +8,15 @@ StateMachine::StateMachine()
 : _currentState(nullptr)
 , _errorHandler(nullptr)
 , _previousState(nullptr)
+, _errorState(nullptr)
 , _transitioningInProgress(false)
+, _currentEventIndex(0)
 {
-
 }
 
 StateMachine::~StateMachine()
 {
-
+    reset();
 }
 
 bool StateMachine::init(State* initialState, State* errorState)
@@ -42,12 +43,12 @@ bool StateMachine::init(State* initialState, State* errorState)
 
 bool StateMachine::handleEvent(const Event* event)
 {
-    if(!_currentState || !event)
+    if(_currentState == nullptr || event == nullptr)
     {
         return false;
     }
 
-    // Prevent processing the event again
+    // Prevent processing the event again 
     //when the state transition is triggered during event handling.
     if(_transitioningInProgress)
     {
@@ -125,3 +126,33 @@ State* StateMachine::getCurrentState()
 {
     return _currentState;
 }
+
+Event* StateMachine::getEvent(EventType type)
+{
+    for (int i = 0; i < EVENT_ARR_SIZE; i++) {
+        if (!_eventArr[i].isInUse()) {
+            _eventArr[i].setType(type);
+            _eventArr[i].setInUse(true);
+            return &_eventArr[i];
+        }
+    }
+    return nullptr;
+}
+
+void StateMachine::recycleEvent(Event* event)
+{
+    if (event) {
+        event->setInUse(false);
+    }
+}
+
+void StateMachine::reset()
+{
+    // 重置事件池，回收所有事件
+    for (int i = 0; i < EVENT_ARR_SIZE; i++) {
+        _eventArr[i].setType(EventType::None);
+        _eventArr[i].setInUse(false);
+    }
+    _currentEventIndex = 0;
+}
+

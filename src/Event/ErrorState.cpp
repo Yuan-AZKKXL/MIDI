@@ -24,7 +24,7 @@ void ErrorState::onExit()
 
 }
 
-bool ErrorState::handleEvent(StateMachine* machine, Event* event)
+bool ErrorState::handleEvent(StateMachine* machine,Event* event)
 {
     if(machine == nullptr || event == nullptr)
     {

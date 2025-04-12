@@ -8,11 +8,6 @@
 #include <Arduino.h>
 #include "Event/Event.h"
 
-#define BUTTON_A_PIN 1
-#define BUTTON_B_PIN 2
-#define BUTTON_C_PIN 3
-#define BUTTON_D_PIN 4
-
 
 extern bool shortPressFlag_A;
 extern bool longPressFlag_A;
@@ -28,7 +23,8 @@ extern bool longPressFlag_D;
 extern bool releaseFlag_D;
 
 //
-struct BtnState {
+struct BtnState 
+{
     int buttonState;
     int lastButtonState;
     unsigned long lastDebounceTime;
@@ -36,7 +32,8 @@ struct BtnState {
     bool longPressTriggered;
 };
 
-struct ButtonFlags {
+struct ButtonFlags 
+{
     bool& shortPress;
     bool& longPress;
     bool& release;
@@ -44,7 +41,7 @@ struct ButtonFlags {
     EventType longPressType;
 };
 
-void initButtons();
+void initButtons(uint8_t pin);
 void detectButtonEvents(uint8_t buttonPin, BtnState& button, bool& shortPressFlag, bool& releaseFlag,bool& longPressFlag);
 
 

@@ -5,19 +5,46 @@
 #include "Event/BpmMode.h"
 #include "Event/TrackMode.h"
 #include "Event/ErrorState.h"
+#include "Event/music.h"
 
-//定义不同模式下的指示灯
-#define STATE_1_LED_TIME 800
-#define STATE_2_LED_TIME 400
-#define STATE_3_LED_TIME 200
+//LED toggle events corresponding to different modes
+#define STATE_1_LED_TIME 2000
+#define STATE_2_LED_TIME 500
+#define STATE_3_LED_TIME 100
+//define LED Pins
 #define LED_PIN LED_BUILTIN
+/*
+ Define the hardware serial port and its pins. If you need to use a hardware serial port
+ please refer to the documentation of the corresponding development board for specific hardware pin definitions.
+ */
+#define XIAO_TX 43
+#define XIAO_RX 44
+#define SERIAL Serial2
+/*
+Define the software serial port and its pins. If you need to use a software serial port
+this example uses a hardware serial port, so the software serial port is commented out.
+To use a software serial port, you should first install the EspSoftwareSerial library.
+*/
+// #include <SoftwareSerial.h>
+// #define XIAO_TX_SW 7
+// #define XIAO_RX_SW 8
+// SoftwareSerial swSerial(XIAO_RX, XIAO_TX);//RX TX
 
-//创建按钮所需要的结构体
+// Define the buttons. The pins here correspond to the XIAO_ESP32S3.
+// For other platforms, you need to refer to the corresponding documentation.
+#define BUTTON_A_PIN 1  // Button 1 on XIAO_ESP32S3
+#define BUTTON_B_PIN 2  // Button 2 on XIAO_ESP32S3
+#define BUTTON_C_PIN 3  // Button 3 on XIAO_ESP32S3
+#define BUTTON_D_PIN 4  // Button 4 on XIAO_ESP32S3
+
+
+//Define the structure needed for the button
 BtnState btnA = {HIGH, HIGH, 0, 0, false};
 BtnState btnB = {HIGH, HIGH, 0, 0, false};
 BtnState btnC = {HIGH, HIGH, 0, 0, false};
 BtnState btnD = {HIGH, HIGH, 0, 0, false};
-//定义按钮和状态机事件的数组
+
+// Define an array of buttons and state machine events
 ButtonFlags buttonFlags[] = {
     {shortPressFlag_A, longPressFlag_A, releaseFlag_A, EventType::APressed, EventType::ALongPressed},
     {shortPressFlag_B, longPressFlag_B, releaseFlag_B, EventType::BPressed, EventType::BLongPressed},
@@ -25,80 +52,32 @@ ButtonFlags buttonFlags[] = {
     {shortPressFlag_D, longPressFlag_D, releaseFlag_D, EventType::DPressed, EventType::DLongPressed}
 };
 
-//轨道和弦所需结构体示例
-const musicData channel_1_chord =
-{
-    CHANNEL_9,
-    {
-        {NOTE_C2, true},
-        {NOTE_FS2, true},
-    },
-    VELOCITY_DEFAULT ,
-    synth.bpmToMs(BPM_DEFAULT),
-    0,
-};
-
-const musicData channel_2_chord =
-{
-CHANNEL_9,
-{
-                {NOTE_FS2, true},
-    },
-    VELOCITY_DEFAULT ,
-    synth.bpmToMs(BPM_DEFAULT),
-    1
-};
-
-const musicData channel_3_chord =
-{
-CHANNEL_9,
-{
-                    {NOTE_D2, true},
-                    {NOTE_FS2, true},
-        },
-        VELOCITY_DEFAULT ,
-    synth.bpmToMs(BPM_DEFAULT),
-    2
-};
-const musicData channel_4_chord =
-{
-CHANNEL_9,
-{
-                    {NOTE_FS2, true},
-        },
-        VELOCITY_DEFAULT ,
-        synth.bpmToMs(BPM_DEFAULT),
-    3
-};
-musicData track2[] = {channel_1_chord, channel_2_chord, channel_3_chord, channel_4_chord};
-
-//创建音序器
+//create SAM2695Synth
 SAM2695Synth synth = SAM2695Synth::getInstance();
-//创建状态机
+//create state machine
 StateMachine stateMachine;
 StateManager* manager = StateManager::getInstance();
 
-//节拍相关
-int beatCount = 0;                                  // 打拍计数器
-unsigned long preMillisCh_1 = 0;                    // 记录轨道1上一次发送MIDI信号的时间
-unsigned long preMillisCh_2 = 0;                    // 记录轨道2上一次发送MIDI信号的时间
-unsigned long preMillisCh_3 = 0;                    // 记录轨道2上一次发送MIDI信号的时间
-unsigned long preMillisCh_4 = 0;                    // 记录轨道2上一次发送MIDI信号的时间
-unsigned long preMillisCh_drup = 0;                 // 鼓点轨道上一次发送MIDI信号的时间
-int noteType = QUATER_NOTE;                         // 音符类型选择，0（四分音符）、1（八分音符）、2（十六音符）
-int beatsPerBar = BEATS_BAR_DEFAULT;                // 每小节拍数，可以是2、3或4
-uint8_t drupCount = 0;                              //鼓点轨道播放计数器
+int beatCount = 0;                                  // Beat counter
+int noteType = QUATER_NOTE;                         // Note type selection: 0 (quarter note), 1 (eighth note), 2 (sixteenth note)
+int beatsPerBar = BEATS_BAR_DEFAULT;                // Beats per measure, can be 2, 3, or 4
 
-//指示灯状态
-uint8_t  modeID = AuditionMode::ID;                       //模式ID
-int ledTime = STATE_1_LED_TIME;                     //LED反转时间，500ms
-unsigned long previousMillisLED = 0;                //记录上一次灯的时间
+unsigned long preMillisCh_1 = 0;                    // Record the time of the last MIDI signal sent on track 1
+unsigned long preMillisCh_2 = 0;                    // Record the time of the last MIDI signal sent on track 2
+unsigned long preMillisCh_3 = 0;                    // Record the time of the last MIDI signal sent on track 3
+unsigned long preMillisCh_4 = 0;                    // Record the time of the last MIDI signal sent on track 4
+unsigned long preMillisCh_drup = 0;                 // Record the time of the last MIDI signal sent on track drup
+uint8_t drupCount = 0;                              // drup track count
+uint8_t countBytrack1 = 0;                          // music 1 count
+uint8_t countBytrack2 = 0;                          // music 2 count
 
-// 事件数组的大小
-#define EVENT_ARR_SIZE  3
-Event eventArray[EVENT_ARR_SIZE];
+//LED data
+uint8_t  modeID = AuditionMode::ID;                 // state mode id
+int ledTime = STATE_1_LED_TIME;                     // LED toggle events TIME
+unsigned long previousMillisLED = 0;                // Record the time of  the last LED toggle
+uint8_t InstrumentSelect = 15;
+bool eventFlag = false;
 
-// //获取下一个事件
 Event* getNextEvent()
 {
     // detectButtonEvents(BUTTON_A_PIN, btnA, act);
@@ -107,30 +86,14 @@ Event* getNextEvent()
     detectButtonEvents(BUTTON_C_PIN, btnC, shortPressFlag_C, longPressFlag_C, releaseFlag_C);
     detectButtonEvents(BUTTON_D_PIN, btnD, shortPressFlag_D, longPressFlag_D, releaseFlag_D);
 
-    // 检查短按和长按标志
     for (const auto& flags : buttonFlags) {
         if (flags.shortPress) {
             flags.shortPress = false;
-            Serial.println("short press");
-            for (int i = 0; i < EVENT_ARR_SIZE; i++) {
-                if (!eventArray[i].isInUse()) {
-                    eventArray[i].setType(flags.shortPressType);
-                    eventArray[i].setInUse(true);
-                    return &eventArray[i];
-                }
-            }
-
+            return stateMachine.getEvent(flags.shortPressType);
         }
         if (flags.longPress) {
             flags.longPress = false;
-            for (int i = 0; i < EVENT_ARR_SIZE; i++) {
-                if (!eventArray[i].isInUse()) {
-                    eventArray[i].setType(flags.longPressType);
-                    eventArray[i].setInUse(true);
-                    return &eventArray[i];
-                }
-            }
-            // return eventPool.getEvent(flags.longPressType);
+            return stateMachine.getEvent(flags.longPressType);
         }
     }
 
@@ -143,28 +106,13 @@ Event* getNextEvent()
     }
 
     if (anyReleased) {
-        for (int i = 0; i < EVENT_ARR_SIZE; i++) {
-            if (!eventArray[i].isInUse()) {
-                eventArray[i].setType(EventType::BtnReleased);
-                eventArray[i].setInUse(true);
-                return &eventArray[i];
-            }
-        }
-        // return eventPool.getEvent(EventType::BtnReleased);
+        return stateMachine.getEvent(EventType::BtnReleased);
     }
 
     return nullptr;
 }
 
-//回收事件
-void recycleEvent(Event* event) {
-    if (event) {
-        event->setType(EventType::None);
-        event->setInUse(false);  // 标记事件为未使用
-    }
-}
-
-//灯光显示
+//LED show for diffent mode
 void ledShow()
 {
     modeID = stateMachine.getCurrentState()->getID();
@@ -188,13 +136,13 @@ void ledShow()
     }
 }
 
-//多轨和弦播放
+//Multi-track chord play"
 void multiTrackPlay()
 {
     unsigned long currentMillis = millis();
     if(channel_1_on_off_flag)
     {
-        if (currentMillis - preMillisCh_1 >= channel_1_chord.bpm)
+        if (currentMillis - preMillisCh_1 >= channel_1_chord.delay)
         {
             preMillisCh_1 = currentMillis;
             synth.playChord(channel_1_chord);
@@ -203,7 +151,7 @@ void multiTrackPlay()
 
     if(channel_2_on_off_flag)
     {
-        if(currentMillis - preMillisCh_2 >= channel_2_chord.bpm)
+        if(currentMillis - preMillisCh_2 >= channel_2_chord.delay)
         {
             preMillisCh_2 = currentMillis;
             synth.playChord(channel_2_chord);
@@ -212,55 +160,71 @@ void multiTrackPlay()
 
     if(channel_3_on_off_flag)
     {
-        if(currentMillis - preMillisCh_3 >= channel_3_chord.bpm)
+        if(currentMillis - preMillisCh_3 >= track1[countBytrack1].delay)
         {
             preMillisCh_3 = currentMillis;
-            synth.playChord(channel_3_chord);
+            if(track1[countBytrack1].index == countBytrack1)
+            {
+                synth.playChord(track1[countBytrack1]);
+                countBytrack1 = (countBytrack1+1) % (sizeof(track1)/sizeof(track1[0]));
+            }
         }
     }
 
     if(channel_4_on_off_flag)
     {
-        if(currentMillis - preMillisCh_4 >= channel_4_chord.bpm)
+        if(currentMillis - preMillisCh_4 >= track2[countBytrack2].delay)
         {
             preMillisCh_4 = currentMillis;
-            synth.playChord(channel_4_chord);
+            if(track2[countBytrack2].index == countBytrack2)
+            {
+                synth.playChord(track2[countBytrack2]);
+                countBytrack2 = (countBytrack2+1) % (sizeof(track2)/sizeof(track2[0]));
+            }
         }
     }
 
     unsigned long interval = (BASIC_TIME / synth.getBpm()) / (noteType + 1);
-    if (currentMillis - preMillisCh_drup >= interval)
+    if (drum_on_off_flag)
     {
-        preMillisCh_drup = currentMillis;
-        if(drum_on_off_flag)
+        if(currentMillis - preMillisCh_drup >= interval)
         {
-            if(track2[drupCount].index == drupCount)
+            preMillisCh_drup = currentMillis;
+            if(track3[drupCount].index == drupCount )
             {
-                synth.playChord(track2[drupCount]);
+                synth.playChord(track3[drupCount]);
             }
-            drupCount = (drupCount+1) % (sizeof(track2)/sizeof(track2[0]));
+            drupCount = (drupCount + 1) % (sizeof(track3)/sizeof(track3[0]));
         }
     }
 }
 
+
 void setup()
 {
-    //初始化串口
-    Serial.begin(115200);
-    //初始化LED
+    //init usb serial port
+    Serial.begin(USB_SERIAL_BAUD_RATE);
+    //init LED
     pinMode(LED_PIN, OUTPUT);
-    initButtons();
+    //synth init
+    // Synth initialization. Since a hardware serial port is used here, the software serial port is commented out.
+    synth.begin(&SERIAL, MIDI_SERIAL_BAUD_RATE, XIAO_RX, XIAO_TX);
+    synth.setInstrument(0, 0, InstrumentSelect);
+    // synth.begin(&swSerial,MIDI_SERIAL_BAUD_RATE);
+    // Initialize the buttons you are using.
+    initButtons(BUTTON_A_PIN);
+    initButtons(BUTTON_B_PIN);
+    initButtons(BUTTON_C_PIN);
+    initButtons(BUTTON_D_PIN);
     delay(3000);
-    //初始化音序器
-    synth.begin();
-    //注册按钮状态
+    //regist three mode state
     manager->registerState(new AuditionMode());
     manager->registerState(new BpmMode());
     manager->registerState(new TrackMode());
-    //注册错误状态
+    //regist error state
     ErrorState* errorState = new ErrorState();
     manager->registerState(errorState);
-    //初始化状态机
+    //init state machine
     if(!(stateMachine.init(manager->getState(AuditionMode::ID), errorState)))
     {
         StateManager::releaseInstance();
@@ -272,17 +236,12 @@ void setup()
 void loop()
 {
     Event* event = getNextEvent();
-    //如果有输入事件，则处理
-    if(event)
+    if(event != nullptr)
     {
         stateMachine.handleEvent(event);
-        recycleEvent(event);
+        // set the event type is None
+        stateMachine.recycleEvent(event);
     }
     multiTrackPlay();
     ledShow();
 }
-
-
-
-
-

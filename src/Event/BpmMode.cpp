@@ -20,7 +20,7 @@ void BpmMode::onExit()
     drum_on_off_flag = false;
 }
 
-bool BpmMode::handleEvent(StateMachine* machine, Event* event)
+bool BpmMode::handleEvent(StateMachine* machine,Event* event)
 {
     if (machine == nullptr || event == nullptr)
     {

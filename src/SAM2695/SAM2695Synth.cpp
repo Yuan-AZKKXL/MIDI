@@ -7,11 +7,26 @@
 
 SAM2695Synth::SAM2695Synth()
 :_serial(nullptr)
+,_softSerial(nullptr)
 ,_pitch(60)
 ,_velocity(90)
 ,_bpm(BPM_DEFAULT)
 {
 
+}
+
+SAM2695Synth::~SAM2695Synth()
+{
+    if(_serial != nullptr)
+    {
+        delete _serial;
+        _serial = nullptr;
+    }
+    if(_softSerial != nullptr)
+    {
+        delete _softSerial;
+        _softSerial = nullptr;
+    }
 }
 
 // Get the singleton, ensuring there is only one object.
@@ -36,6 +51,20 @@ void SAM2695Synth::begin(HardwareSerial* serial, int baud, uint8_t RX, uint8_t T
 {
     _serial = serial;
     _serial->begin(baud, SERIAL_8N1, RX, TX);
+}
+
+// Initializes the software serial communication with the specified baud rate.
+// This function is called when the 'begin' function is invoked with a pointer to a SoftwareSerial object and a baud rate.
+// Parameters:
+//   serial - A pointer to the SoftwareSerial object that will handle the communication.
+//   baud - The baud rate for the serial communication (usually 9600, 115200, etc.).
+void SAM2695Synth::begin(SoftwareSerial *serial , int baud)
+{
+    _softSerial = serial;
+    if(_softSerial != nullptr)
+    {
+        _softSerial->begin(baud);
+    }
 }
 
 // Sets the instrument for a specific MIDI bank and channel by sending appropriate MIDI control and program change messages
@@ -64,14 +93,9 @@ void SAM2695Synth::setInstrument(uint8_t bank, uint8_t channel, uint8_t value)
 //   velocity - The velocity (0-127) indicating how hard the note is struck (higher values for louder sounds).
 void SAM2695Synth::setNoteOn(uint8_t channel, uint8_t pitch, uint8_t velocity)
 {
-    if(-1 == pitch)
-        pitch = _pitch;
-    if(-1 == velocity)
-        velocity = _velocity;
     uint8_t CMD_NOTE_ON[] = {(uint8_t)(MIDI_COMMAND_ON | (channel & 0x0f)),
                              pitch, velocity};
     sendCMD(CMD_NOTE_ON, sizeof(CMD_NOTE_ON));
-    return ;
 }
 
 // Sends a MIDI "Note Off" message to stop a note on a specific MIDI channel
@@ -238,20 +262,24 @@ uint8_t SAM2695Synth::getBpm() const
     return _bpm;
 }
 
-unsigned long SAM2695Synth::bpmToMs(uint8_t bpm)
-{
-    setBpm(bpm);
-    unsigned long interval = (BASIC_TIME / getBpm());
-    return interval;
-}
-
 // Sends a command to the serial interface.
 // This function sends a byte array (cmd) of a specified length (len) through the serial port.
 // It uses the _serial object's write method to transmit the command data.
 // Parameters:
 // - cmd: A pointer to a byte array containing the command data to be sent.
 // - len: The length of the byte array to be sent.
-void SAM2695Synth::sendCMD(byte* cmd, int len)
+void SAM2695Synth::sendCMD(uint8_t *buffer, size_t size)
 {
-    _serial->write(cmd, len);
+
+    _serial->write(buffer, size);
+    // if(_serial == nullptr && _softSerial == nullptr){
+    //     Serial.println("hardware serial and software serial error! please check!");
+    //     return ;
+    // }
+    // if(_serial != nullptr){
+    //     _serial->write(cmd, len);
+    // }
+    // if(_softSerial != nullptr){
+    //     _softSerial->write(cmd, len);
+    // }
 }
